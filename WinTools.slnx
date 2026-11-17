@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/dhcp-finder/">
+    <Project Path="dhcp-finder/DhcpFinder.csproj" />
+  </Folder>
+  <Folder Name="/mtu-finder.Core/">
+    <Project Path="mtu-finder.Core/MtuFinder.Core.csproj" />
+  </Folder>
+  <Folder Name="/mtu-finder.Tests/">
+    <Project Path="mtu-finder.Tests/MtuFinder.Tests.csproj" />
+  </Folder>
+  <Folder Name="/mtu-finder/">
+    <Project Path="mtu-finder/MtuFinder.csproj" />
+  </Folder>
+  <Folder Name="/win-route-edit/">
+    <Project Path="win-route-edit/WinRouteEdit.csproj" />
+  </Folder>
+</Solution>
