@@ -21,7 +21,7 @@ Requires the .NET 10 SDK.
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
 ```
 
-Output: `publishDhcpFinder.exe`. Use `--self-contained false` for a small build that needs the .NET 10 Desktop Runtime.
+Output: `publish\DhcpFinder.exe`. Use `--self-contained false` for a small build that needs the .NET 10 Desktop Runtime.
 
 ## Notes
 
