@@ -38,6 +38,15 @@
   <Folder Name="/port-probe/">
     <Project Path="port-probe/PortProbe.csproj" />
   </Folder>
+  <Folder Name="/snmp-live-graph.Core/">
+    <Project Path="snmp-live-graph.Core/SnmpLiveGraph.Core.csproj" />
+  </Folder>
+  <Folder Name="/snmp-live-graph.Tests/">
+    <Project Path="snmp-live-graph.Tests/SnmpLiveGraph.Tests.csproj" />
+  </Folder>
+  <Folder Name="/snmp-live-graph/">
+    <Project Path="snmp-live-graph/SnmpLiveGraph.csproj" />
+  </Folder>
   <Folder Name="/win-route-edit/">
     <Project Path="win-route-edit/WinRouteEdit.csproj" />
   </Folder>

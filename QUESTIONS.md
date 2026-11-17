@@ -9,6 +9,8 @@
 | mtu-finder | 21 pass | yes + live ICMP test against 8.8.8.8 | |
 | port-probe | 25 pass | yes | |
 | auth-mail-test | 54 pass | yes | LDAP path has no live test (no LDAP server on this PC) |
+| snmp-live-graph | 29 pass | yes, plus a harness that rendered a live chart (screenshot checked) and ran from a single-file publish | v2c tested end to end against an in-process fake agent; **v3 untested** |
+| pktmon-gui | 43 pass | yes (UI only — see below) | Needs admin; I could NOT run the real pktmon driver |
 
 ## Questions for you
 
@@ -19,4 +21,9 @@
 5. **Old dhcp-finder repo** — still need your yes to put a "moved to WinTools" note in its README and archive it.
 6. **Persistent routes registry key** (your earlier question) — still unanswered; say the word and I'll check it.
 
-(Apps below are appended as they get done.)
+7. **pktmon-gui — please test elevated.** Every pktmon command returns "Access is denied" without admin, so I never saw the real output of `pktmon list --json`, `counters`, `status` or `etl2txt` on this build. The parsers are defensive and tested against sample text I wrote from memory — they may need adjusting. Specifically check: adapter list fills in, counters show numbers, Drops tab finds drops, leftover-capture detection at startup (it uses text heuristics on `pktmon status`). The exe uses a requireAdministrator manifest (UAC prompt on launch), so I only smoke-tested a non-elevated build.
+8. **pktmon-gui** — optional de-duplication of multi-component captures is not built. Want it?
+
+9. **snmp-live-graph — SNMPv3** is written but untested against a real device (my test agent is v2c only). Could you try it against one v3 device? Also not built yet: threshold lines, ad-hoc OID graphs and the interface up/down change log (all "extras" in your spec).
+10. **Not started** (ran out of overnight runway, in your agreed order): radius-tester, forti-flow (needs your sanitised samples first — allowed+SNAT, denied by policy, RPF drop, IPsec, VIP/DNAT), host-top, wifi-roam-log. Want me to continue with radius-tester next?
+11. **Repo housekeeping** — the root README table lists all new apps. Each app folder has `publish/` output (git-ignored) with a ~115 MB self-contained exe.
