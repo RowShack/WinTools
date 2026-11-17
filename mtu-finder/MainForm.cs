@@ -111,7 +111,7 @@ public sealed class MainForm : Form
 
         var reference = new TextBox
         {
-            Dock = DockStyle.Fill, Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, BackColor = SystemColors.Window,
+            Dock = DockStyle.Fill, Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, BackColor = SystemColors.Window, Font = new Font(FontFamily.GenericMonospace, 8.5f),
             Text = ReferenceText.Replace("\n", Environment.NewLine),
         };
         var refBox = new GroupBox { Text = "Reference: common MTUs", Dock = DockStyle.Right, Width = 380, Padding = new Padding(6) };

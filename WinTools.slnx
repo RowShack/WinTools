@@ -11,6 +11,15 @@
   <Folder Name="/mtu-finder/">
     <Project Path="mtu-finder/MtuFinder.csproj" />
   </Folder>
+  <Folder Name="/port-probe.Core/">
+    <Project Path="port-probe.Core/PortProbe.Core.csproj" />
+  </Folder>
+  <Folder Name="/port-probe.Tests/">
+    <Project Path="port-probe.Tests/PortProbe.Tests.csproj" />
+  </Folder>
+  <Folder Name="/port-probe/">
+    <Project Path="port-probe/PortProbe.csproj" />
+  </Folder>
   <Folder Name="/win-route-edit/">
     <Project Path="win-route-edit/WinRouteEdit.csproj" />
   </Folder>
