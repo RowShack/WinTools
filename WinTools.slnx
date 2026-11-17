@@ -20,6 +20,15 @@
   <Folder Name="/mtu-finder/">
     <Project Path="mtu-finder/MtuFinder.csproj" />
   </Folder>
+  <Folder Name="/pktmon-gui.Core/">
+    <Project Path="pktmon-gui.Core/PktmonGui.Core.csproj" />
+  </Folder>
+  <Folder Name="/pktmon-gui.Tests/">
+    <Project Path="pktmon-gui.Tests/PktmonGui.Tests.csproj" />
+  </Folder>
+  <Folder Name="/pktmon-gui/">
+    <Project Path="pktmon-gui/PktmonGui.csproj" />
+  </Folder>
   <Folder Name="/port-probe.Core/">
     <Project Path="port-probe.Core/PortProbe.Core.csproj" />
   </Folder>
