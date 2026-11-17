@@ -6,7 +6,7 @@ public sealed class MainForm : Form
 {
     private readonly DataGridView _grid = new()
     {
-        Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false, AllowUserToDeleteRows = false,
+        Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false, AllowUserToDeleteRows = false, AllowUserToResizeRows = false,
         SelectionMode = DataGridViewSelectionMode.FullRowSelect, MultiSelect = true, RowHeadersVisible = false,
         AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells, BackgroundColor = SystemColors.Window,
     };
@@ -18,6 +18,7 @@ public sealed class MainForm : Form
     private readonly ToolStripButton _remove = new("Remove") { DisplayStyle = ToolStripItemDisplayStyle.Text };
     private readonly ToolStripButton _manage = new("Manage…") { DisplayStyle = ToolStripItemDisplayStyle.Text };
     private readonly ToolStripTextBox _filter = new() { Width = 160, ToolTipText = "Filter routes" };
+    private readonly TabControl _tabs = new() { Dock = DockStyle.Top, Height = 30, Padding = new Point(18, 4) };
     private readonly ToolStripStatusLabel _status = new("Ready");
     private readonly Panel _banner = new() { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(255, 244, 206), Visible = false };
 
@@ -26,6 +27,8 @@ public sealed class MainForm : Form
     private List<RouteProfile> _profiles = ProfileStore.Load();
     private readonly bool _isAdmin = RouteService.IsAdmin();
     private bool _busy;
+    private DateTime _lastRefresh;
+    private bool V6 => _tabs.SelectedIndex == 1;
 
     public MainForm()
     {
@@ -56,7 +59,10 @@ public sealed class MainForm : Form
         statusBar.Items.Add(_status);
 
         BuildColumns();
+        _tabs.TabPages.Add("IPv4");
+        _tabs.TabPages.Add("IPv6");
         Controls.Add(_grid);
+        Controls.Add(_tabs);
         Controls.Add(_banner);
         Controls.Add(tools);
         Controls.Add(statusBar);
@@ -77,6 +83,7 @@ public sealed class MainForm : Form
         _remove.Click += async (_, _) => await ApplyProfileAsync(remove: true);
         _manage.Click += async (_, _) => await ManageAsync();
         _filter.TextChanged += (_, _) => Render();
+        _tabs.SelectedIndexChanged += (_, _) => Render();
         _grid.SelectionChanged += (_, _) => UpdateButtons();
         _grid.SortCompare += GridSortCompare;
         _grid.KeyDown += async (_, e) => { if (e.KeyCode == Keys.Delete) await DeleteAsync(); else if (e.KeyCode == Keys.F5) await ReloadAsync(); };
@@ -114,8 +121,8 @@ public sealed class MainForm : Form
             var ifTask = RouteService.GetInterfacesAsync();
             _routes = await routesTask;
             _interfaces = await ifTask;
+            _lastRefresh = DateTime.Now;
             Render();
-            _status.Text = $"{_routes.Count} routes  ·  {_routes.Count(r => r.Persistent)} persistent  ·  refreshed {DateTime.Now:HH:mm:ss}";
         }
         catch (Exception ex) { _status.Text = "Failed to read routes."; Error("Couldn't read the routing table", ex); }
         finally { SetBusy(false); }
@@ -125,7 +132,7 @@ public sealed class MainForm : Form
     {
         string f = _filter.Text.Trim();
         var key = SelectedKeys();
-        var view = _routes.Where(r => f.Length == 0 ||
+        var view = _routes.Where(r => r.IsV6 == V6).Where(r => f.Length == 0 ||
             $"{r.Prefix} {r.NextHop} {r.IfAlias} {r.Protocol}".Contains(f, StringComparison.OrdinalIgnoreCase));
 
         _grid.Rows.Clear();
@@ -135,11 +142,13 @@ public sealed class MainForm : Form
                 r.IfMetric, r.TotalMetric, r.Protocol, r.Persistent ? "Yes" : "", r.Active ? "" : "No (saved only)");
             var row = _grid.Rows[i];
             row.Tag = r;
-            if (r.Prefix == "0.0.0.0/0") row.DefaultCellStyle.Font = new Font(Font, FontStyle.Bold);
+            if (r.Prefix is "0.0.0.0/0" or "::/0") row.DefaultCellStyle.Font = new Font(Font, FontStyle.Bold);
             if (!r.Active) row.DefaultCellStyle.ForeColor = SystemColors.GrayText;
             else if (r.Persistent) row.DefaultCellStyle.BackColor = Color.FromArgb(232, 244, 255);
             if (key.Contains((r.Prefix, r.NextHop, r.IfIndex))) row.Selected = true;
         }
+        var mine = _routes.Where(r => r.IsV6 == V6).ToList();
+        _status.Text = $"{(V6 ? "IPv6" : "IPv4")}: {mine.Count} routes  ·  {mine.Count(r => r.Persistent)} persistent  ·  refreshed {_lastRefresh:HH:mm:ss}";
         if (_grid.SortedColumn is null) _grid.Sort(_grid.Columns["dest"]!, System.ComponentModel.ListSortDirection.Ascending);
         UpdateButtons();
     }
@@ -169,7 +178,7 @@ public sealed class MainForm : Form
 
     private async Task AddAsync()
     {
-        using var d = new AddRouteDialog("Add route", _interfaces);
+        using var d = new AddRouteDialog("Add route", _interfaces.Where(i => i.V6 == V6).ToList(), null, V6);
         if (d.ShowDialog(this) != DialogResult.OK) return;
         var r = d.Result;
         await Run($"Adding {r.Prefix}…", async () =>
@@ -185,7 +194,7 @@ public sealed class MainForm : Form
         if (sel.Count == 0 || !_isAdmin) return;
         string list = string.Join("\n", sel.Take(8).Select(r => $"  {r.Prefix} via {(r.IsOnLink ? "on-link" : r.NextHop)}  [{r.IfAlias}]"))
             + (sel.Count > 8 ? $"\n  … and {sel.Count - 8} more" : "");
-        bool risky = sel.Any(r => r.Prefix == "0.0.0.0/0");
+        bool risky = sel.Any(r => r.Prefix is "0.0.0.0/0" or "::/0");
         string warn = risky ? "\n\nThis includes a DEFAULT ROUTE — deleting it can cut off internet access." : "";
         if (MessageBox.Show(this, $"Delete {sel.Count} route(s)?\n\n{list}{warn}", "Delete routes",
                 MessageBoxButtons.YesNo, risky ? MessageBoxIcon.Warning : MessageBoxIcon.Question) != DialogResult.Yes) return;
@@ -219,7 +228,7 @@ public sealed class MainForm : Form
     private async Task ManageAsync()
     {
         string? sel = (_profile.SelectedItem as RouteProfile)?.Name;
-        using var d = new ProfilesDialog(_profiles, _interfaces, sel);
+        using var d = new ProfilesDialog(_profiles, _interfaces.DistinctBy(i => i.Index).ToList(), sel);
         d.ShowDialog(this);
         RefreshProfileList(sel);
         await Task.CompletedTask;

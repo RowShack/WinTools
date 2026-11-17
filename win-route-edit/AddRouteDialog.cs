@@ -11,8 +11,13 @@ public sealed class AddRouteDialog : Form
 
     public ProfileRoute Result { get; private set; } = new();
 
-    public AddRouteDialog(string title, IReadOnlyList<InterfaceInfo> interfaces, ProfileRoute? existing = null)
+    public AddRouteDialog(string title, IReadOnlyList<InterfaceInfo> interfaces, ProfileRoute? existing = null, bool v6 = false)
     {
+        if (v6)
+        {
+            _dest.PlaceholderText = "2001:db8::/32";
+            _gw.PlaceholderText = "fe80::1  (:: = on-link)";
+        }
         Text = title;
         Font = new Font("Segoe UI", 9.5f);
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -62,9 +67,11 @@ public sealed class AddRouteDialog : Form
     private void TryAccept()
     {
         if (!RouteService.TryParsePrefix(_dest.Text, out var cidr, out var err)) { Warn(err, _dest); return; }
-        if (!RouteService.TryIPv4(_gw.Text, out var gw)) { Warn("Gateway is not a valid IPv4 address (use 0.0.0.0 for on-link).", _gw); return; }
+        bool isV6 = cidr.Contains(':');
+        if (!RouteService.TryIP(_gw.Text, isV6, out var gw))
+        { Warn(isV6 ? "Gateway is not a valid IPv6 address (use :: for on-link)." : "Gateway is not a valid IPv4 address (use 0.0.0.0 for on-link).", _gw); return; }
         int? ifIndex = _if.SelectedItem is InterfaceInfo i ? i.Index : null;
-        if (ifIndex is null && gw.Equals(System.Net.IPAddress.Any)) { Warn("Pick an interface for an on-link (0.0.0.0) route.", _if); return; }
+        if (ifIndex is null && RouteService.IsAnyAddress(gw)) { Warn("Pick an interface for an on-link route.", _if); return; }
 
         Result = new ProfileRoute { Prefix = cidr, NextHop = gw.ToString(), Metric = (int)_metric.Value, IfIndex = ifIndex, Persistent = _persist.Checked };
         DialogResult = DialogResult.OK;

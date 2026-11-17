@@ -11,16 +11,17 @@ public sealed record RouteEntry(
     int RouteMetric, int IfMetric, string Protocol, bool Persistent, bool Active)
 {
     public int TotalMetric => RouteMetric + IfMetric;
-    public bool IsOnLink => NextHop is "0.0.0.0" or "";
+    public bool IsV6 => Prefix.Contains(':');
+    public bool IsOnLink => NextHop is "0.0.0.0" or "::" or "";
 }
 
-public sealed record InterfaceInfo(int Index, string Alias, int Metric)
+public sealed record InterfaceInfo(int Index, string Alias, int Metric, bool V6 = false)
 {
     public override string ToString() => $"{Alias} (#{Index})";
 }
 
 /// <summary>
-/// Reads and edits the IPv4 routing table through PowerShell's NetTCPIP cmdlets
+/// Reads and edits the IPv4 and IPv6 routing tables through PowerShell's NetTCPIP cmdlets
 /// (Get-/New-/Remove-NetRoute). All values interpolated into scripts are validated
 /// (parsed IPs / integers) first, so no user text reaches the shell.
 /// </summary>
@@ -35,21 +36,38 @@ public static class RouteService
 
     // ---------- parsing / validation ----------
 
-    /// <summary>Accepts "a.b.c.d", "a.b.c.d/24" or "a.b.c.d/255.255.255.0" and returns canonical CIDR.</summary>
+    /// <summary>
+    /// Accepts IPv4 ("a.b.c.d", "a.b.c.d/24", "a.b.c.d/255.255.255.0") or IPv6 ("2001:db8::/32")
+    /// and returns the canonical CIDR. The family is detected from the text.
+    /// </summary>
     public static bool TryParsePrefix(string text, out string cidr, out string error)
     {
         cidr = ""; error = "";
         text = text.Trim();
-        string ipPart = text, lenPart = "32";
+        string ipPart = text, lenPart = "";
         int slash = text.IndexOf('/');
         if (slash >= 0) { ipPart = text[..slash].Trim(); lenPart = text[(slash + 1)..].Trim(); }
+        bool v6 = ipPart.Contains(':');
 
-        if (!TryIPv4(ipPart, out var ip)) { error = "Destination is not a valid IPv4 address."; return false; }
-
-        int len;
-        if (lenPart.Contains('.'))
+        if (v6)
         {
-            if (!TryIPv4(lenPart, out var mask)) { error = "Subnet mask is not valid."; return false; }
+            if (!TryIP(ipPart, true, out var ip6)) { error = "Destination is not a valid IPv6 address."; return false; }
+            int len6 = 128;
+            if (lenPart.Length > 0 && (!int.TryParse(lenPart, out len6) || len6 < 0 || len6 > 128)) { error = "IPv6 prefix length must be 0–128."; return false; }
+            var addr = ToBig(ip6);
+            var hostMask = len6 == 128 ? System.Numerics.BigInteger.Zero : (System.Numerics.BigInteger.One << (128 - len6)) - 1;
+            if ((addr & hostMask) != 0)
+            { error = $"{ipPart} has host bits set for /{len6}. Did you mean {FromBig(addr & ~hostMask)}/{len6}?"; return false; }
+            cidr = $"{ip6}/{len6}";
+            return true;
+        }
+
+        if (!TryIP(ipPart, false, out var ip)) { error = "Destination is not a valid IPv4 address."; return false; }
+        int len;
+        if (lenPart.Length == 0) len = 32;
+        else if (lenPart.Contains('.'))
+        {
+            if (!TryIP(lenPart, false, out var mask)) { error = "Subnet mask is not valid."; return false; }
             uint m = ToUInt(mask);
             len = 0;
             while (len < 32 && (m & (0x80000000u >> len)) != 0) len++;
@@ -66,22 +84,41 @@ public static class RouteService
         return true;
     }
 
-    public static bool TryIPv4(string text, out IPAddress ip)
+    public static bool TryIPv4(string text, out IPAddress ip) => TryIP(text, false, out ip);
+
+    public static bool TryIP(string text, bool v6, out IPAddress ip)
     {
         ip = IPAddress.None;
-        var parts = text.Trim().Split('.');
+        text = text.Trim();
+        if (v6)
+            return text.Contains(':') && !text.Contains('%') && IPAddress.TryParse(text, out ip!) && ip.AddressFamily == AddressFamily.InterNetworkV6;
+        var parts = text.Split('.');
         if (parts.Length != 4 || !parts.All(p => p.Length is > 0 and <= 3 && p.All(char.IsAsciiDigit))) return false;
-        return IPAddress.TryParse(text.Trim(), out ip!) && ip.AddressFamily == AddressFamily.InterNetwork;
+        return IPAddress.TryParse(text, out ip!) && ip.AddressFamily == AddressFamily.InterNetwork;
     }
+
+    public static bool IsAnyAddress(IPAddress ip) => ip.Equals(IPAddress.Any) || ip.Equals(IPAddress.IPv6Any);
 
     private static uint ToUInt(IPAddress ip) { var b = ip.GetAddressBytes(); return (uint)(b[0] << 24 | b[1] << 16 | b[2] << 8 | b[3]); }
     private static IPAddress FromUInt(uint v) => new([(byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v]);
-    public static long SortKey(string prefix)
+    private static System.Numerics.BigInteger ToBig(IPAddress ip) => new(ip.GetAddressBytes(), isUnsigned: true, isBigEndian: true);
+    private static IPAddress FromBig(System.Numerics.BigInteger v)
+    {
+        var bytes = new byte[16];
+        var raw = v.ToByteArray(isUnsigned: true, isBigEndian: true);
+        raw.CopyTo(bytes, 16 - raw.Length);
+        return new IPAddress(bytes);
+    }
+
+    /// <summary>Numeric sort key: address, then prefix length. Works for IPv4 and IPv6.</summary>
+    public static System.Numerics.BigInteger SortKey(string prefix)
     {
         int slash = prefix.IndexOf('/');
         string ip = slash >= 0 ? prefix[..slash] : prefix;
-        int len = slash >= 0 && int.TryParse(prefix[(slash + 1)..], out var l) ? l : 32;
-        return TryIPv4(ip, out var a) ? ((long)ToUInt(a) << 6) | (uint)len : long.MaxValue;
+        int len = slash >= 0 && int.TryParse(prefix[(slash + 1)..], out var l) ? l : 0;
+        bool v6 = ip.Contains(':');
+        if (!TryIP(ip, v6, out var a)) return System.Numerics.BigInteger.MinusOne;
+        return ((v6 ? ToBig(a) : ToUInt(a)) << 8) | (uint)len;
     }
 
     // ---------- reading ----------
@@ -90,8 +127,8 @@ public static class RouteService
     {
         const string script = """
             $ErrorActionPreference='Stop'
-            $a = @(Get-NetRoute -AddressFamily IPv4 -PolicyStore ActiveStore | ForEach-Object { [pscustomobject]@{P=$_.DestinationPrefix;N=$_.NextHop;I=[int]$_.InterfaceIndex;A=[string]$_.InterfaceAlias;R=[int]$_.RouteMetric;M=[int]$_.InterfaceMetric;T=[string]$_.Protocol} })
-            $p = @(Get-NetRoute -AddressFamily IPv4 -PolicyStore PersistentStore -ErrorAction SilentlyContinue | ForEach-Object { [pscustomobject]@{P=$_.DestinationPrefix;N=$_.NextHop;I=[int]$_.InterfaceIndex;A=[string]$_.InterfaceAlias;R=[int]$_.RouteMetric;M=[int]$_.InterfaceMetric;T=[string]$_.Protocol} })
+            $a = @(Get-NetRoute -PolicyStore ActiveStore | ForEach-Object { [pscustomobject]@{P=$_.DestinationPrefix;N=$_.NextHop;I=[int]$_.InterfaceIndex;A=[string]$_.InterfaceAlias;R=[int]$_.RouteMetric;M=[int]$_.InterfaceMetric;T=[string]$_.Protocol} })
+            $p = @(Get-NetRoute -PolicyStore PersistentStore -ErrorAction SilentlyContinue | ForEach-Object { [pscustomobject]@{P=$_.DestinationPrefix;N=$_.NextHop;I=[int]$_.InterfaceIndex;A=[string]$_.InterfaceAlias;R=[int]$_.RouteMetric;M=[int]$_.InterfaceMetric;T=[string]$_.Protocol} })
             [pscustomobject]@{Active=$a;Persistent=$p} | ConvertTo-Json -Depth 4 -Compress
             """;
         using var doc = JsonDocument.Parse(await Ps.RunAsync(script));
@@ -125,13 +162,13 @@ public static class RouteService
     {
         const string script = """
             $ErrorActionPreference='Stop'
-            @(Get-NetIPInterface -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -notlike 'Loopback*' } | Sort-Object InterfaceMetric | ForEach-Object { [pscustomobject]@{I=[int]$_.InterfaceIndex;A=[string]$_.InterfaceAlias;M=[int]$_.InterfaceMetric} }) | ConvertTo-Json -Compress
+            @(Get-NetIPInterface | Where-Object { $_.InterfaceAlias -notlike 'Loopback*' } | Sort-Object InterfaceMetric | ForEach-Object { [pscustomobject]@{I=[int]$_.InterfaceIndex;A=[string]$_.InterfaceAlias;M=[int]$_.InterfaceMetric;F=[string]$_.AddressFamily} }) | ConvertTo-Json -Compress
             """;
         string json = (await Ps.RunAsync(script)).Trim();
         if (json.Length == 0) return [];
         using var doc = JsonDocument.Parse(json);
         var items = doc.RootElement.ValueKind == JsonValueKind.Array ? doc.RootElement.EnumerateArray() : new[] { doc.RootElement }.AsEnumerable().Select(x => x);
-        return items.Select(e => new InterfaceInfo(e.GetProperty("I").GetInt32(), e.GetProperty("A").GetString() ?? "", e.GetProperty("M").GetInt32())).ToList();
+        return items.Select(e => new InterfaceInfo(e.GetProperty("I").GetInt32(), e.GetProperty("A").GetString() ?? "", e.GetProperty("M").GetInt32(), e.GetProperty("F").GetString() == "IPv6")).ToList();
     }
 
     // ---------- editing ----------
@@ -140,14 +177,16 @@ public static class RouteService
     public static async Task AddRouteAsync(string cidr, string nextHop, int metric, int? ifIndex, bool persistent)
     {
         if (!TryParsePrefix(cidr, out cidr, out var err)) throw new ArgumentException(err);
-        if (!TryIPv4(nextHop, out var gw)) throw new ArgumentException("Gateway is not a valid IPv4 address (use 0.0.0.0 for on-link).");
+        bool v6 = cidr.Contains(':');
+        if (!TryIP(nextHop, v6, out var gw))
+            throw new ArgumentException(v6 ? "Gateway is not a valid IPv6 address (use :: for on-link)." : "Gateway is not a valid IPv4 address (use 0.0.0.0 for on-link).");
         if (metric < 0 || metric > 9999) throw new ArgumentException("Metric must be 0–9999.");
 
         var sb = new StringBuilder("$ErrorActionPreference='Stop'\n");
         if (ifIndex is int i) sb.AppendLine($"$idx = {i}");
         else
         {
-            if (gw.Equals(IPAddress.Any)) throw new ArgumentException("Choose an interface for an on-link (0.0.0.0) route.");
+            if (IsAnyAddress(gw)) throw new ArgumentException("Choose an interface for an on-link route.");
             sb.AppendLine($"$idx = (Find-NetRoute -RemoteIPAddress '{gw}' | Where-Object {{ $_.DestinationPrefix }} | Select-Object -First 1).InterfaceIndex");
             sb.AppendLine("if (-not $idx) { throw 'No interface can reach that gateway - pick an interface manually.' }");
         }
@@ -159,7 +198,7 @@ public static class RouteService
 
     public static async Task DeleteRouteAsync(RouteEntry r)
     {
-        if (!TryParsePrefix(r.Prefix, out var cidr, out _) || !TryIPv4(r.NextHop, out var gw))
+        if (!TryParsePrefix(r.Prefix, out var cidr, out _) || !TryIP(r.NextHop, r.IsV6, out var gw))
             throw new ArgumentException($"Can't delete route {r.Prefix} via {r.NextHop}: unrecognised format.");
         string target = $"-DestinationPrefix '{cidr}' -NextHop '{gw}' -InterfaceIndex {r.IfIndex} -Confirm:$false";
         var sb = new StringBuilder("$ErrorActionPreference='Stop'\n");

@@ -1,10 +1,10 @@
 # Win-Route-Edit
 
-A small Windows GUI for viewing and editing the IPv4 routing table — handy when troubleshooting, or when you change routes a lot.
+A small Windows GUI for viewing and editing the IPv4 and IPv6 routing tables — handy when troubleshooting, or when you change routes a lot.
 
 ## Features
 
-- Live view of the routing table (destination, gateway, interface, route/interface/total metric, origin), sortable and filterable
+- Separate IPv4 and IPv6 tabs showing the live routing table (destination, gateway, interface, route/interface/total metric, origin), sortable and filterable
 - Add and delete routes, with validation (CIDR or dotted mask, host-bit check, gateway check)
 - **Persistent routes** — tick "Persistent" and the route survives a reboot. Saved-but-inactive persistent routes (e.g. adapter is down) are shown greyed out
 - **Route profiles** — named sets of routes you can Apply or Remove in one click (e.g. "Office VPN", "Lab network"). Create them in *Manage…*, or right-click rows in the table → *Add selected routes to profile…*
@@ -31,6 +31,6 @@ Routes are read and changed with PowerShell's `Get-NetRoute` / `New-NetRoute` / 
 
 ## Notes
 
-- IPv4 only for now.
+- IPv6 link-local zone IDs (`fe80::1%5`) are not accepted; pick the interface in the dialog instead.
 - Windows-owned routes (origin "Local", e.g. on-link and broadcast entries) are managed by the OS and may be refused or re-created if deleted.
 - Be careful with the default route (`0.0.0.0/0`) — removing it can cut off network access.
