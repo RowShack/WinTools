@@ -1,4 +1,13 @@
 <Solution>
+  <Folder Name="/auth-mail-test.Core/">
+    <Project Path="auth-mail-test.Core/AuthMailTest.Core.csproj" />
+  </Folder>
+  <Folder Name="/auth-mail-test.Tests/">
+    <Project Path="auth-mail-test.Tests/AuthMailTest.Tests.csproj" />
+  </Folder>
+  <Folder Name="/auth-mail-test/">
+    <Project Path="auth-mail-test/AuthMailTest.csproj" />
+  </Folder>
   <Folder Name="/dhcp-finder/">
     <Project Path="dhcp-finder/DhcpFinder.csproj" />
   </Folder>
