@@ -11,5 +11,6 @@ Small, single-purpose Windows utilities. Each app lives in its own folder and is
 | [auth-mail-test](auth-mail-test) | LDAP/LDAPS and SMTP testers with plain-English error explanations |
 | [pktmon-gui](pktmon-gui) | GUI for the built-in Packet Monitor: filters, pcapng export, drops view (needs admin) |
 | [snmp-live-graph](snmp-live-graph) | Live per-interface bandwidth graphs over SNMP v2c/v3, no server needed |
+| [radius-tester](radius-tester) | RADIUS client for testing servers and NAS setups: PAP/CHAP/MS-CHAPv2, MFA challenge, accounting, RadSec |
 
 Downloads are on the [Releases](../../releases) page. Building needs the .NET 10 SDK; see each app's README.

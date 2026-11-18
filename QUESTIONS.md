@@ -27,3 +27,11 @@
 9. **snmp-live-graph — SNMPv3** is written but untested against a real device (my test agent is v2c only). Could you try it against one v3 device? Also not built yet: threshold lines, ad-hoc OID graphs and the interface up/down change log (all "extras" in your spec).
 10. **Not started** (ran out of overnight runway, in your agreed order): radius-tester, forti-flow (needs your sanitised samples first — allowed+SNAT, denied by policy, RPF drop, IPsec, VIP/DNAT), host-top, wifi-roam-log. Want me to continue with radius-tester next?
 11. **Repo housekeeping** — the root README table lists all new apps. Each app folder has `publish/` output (git-ignored) with a ~115 MB self-contained exe.
+
+---
+## Update (after your answers)
+
+- Merged into `main`: mtu-finder TCP estimate, snmp-live-graph extras (thresholds, OID tiles, status log), and **radius-tester** (new). Whole solution builds; 275 tests pass.
+- Decisions recorded: hold releases until you've tested; old dhcp-finder repo already deleted; keep the raw SMTP client; no pktmon de-duplication.
+- Still needs YOU: test pktmon-gui elevated; SNMPv3 on a real device; LDAP against a real server; radius-tester against a real RADIUS server; the persistent-routes registry check (needs your admin approval at the PC).
+- Not started: forti-flow (needs your samples), host-top, wifi-roam-log.
