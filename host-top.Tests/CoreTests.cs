@@ -322,11 +322,19 @@ public class DecoderTests
 {
     private static Func<string, object?> P(Dictionary<string, object?> d) => n => d.GetValueOrDefault(n);
     private static readonly DateTime T = new(2026, 1, 1);
+    /// <summary>A port as the provider delivers it: network byte order (443 = 0xBB01 when read little-endian).</summary>
+    private static ushort Net(int port) => (ushort)(((port & 0xFF) << 8) | (port >> 8));
+
+    [Theory]
+    [InlineData((ushort)0xBB01, 443)]
+    [InlineData((short)-17663, 443)]   // same bits as a signed value, as seen on a real machine
+    [InlineData(0x6C07, 1900)]
+    public void PortIsByteSwappedAndUnsigned(object raw, int expected) => Assert.Equal(expected, EtwDecoder.ToPort(raw));
 
     [Fact]
     public void TcpSendLocalIsSource()
     {
-        var e = EtwDecoder.Decode(10, T, P(new() { ["PID"] = 42u, ["size"] = 1460u, ["saddr"] = "192.168.1.10", ["daddr"] = "8.8.8.8", ["sport"] = (ushort)50000, ["dport"] = (ushort)443 }))!.Value;
+        var e = EtwDecoder.Decode(10, T, P(new() { ["PID"] = 42u, ["size"] = 1460u, ["saddr"] = "192.168.1.10", ["daddr"] = "8.8.8.8", ["sport"] = Net(50000), ["dport"] = Net(443) }))!.Value;
         Assert.True(e.IsSend);
         Assert.Equal(FlowProtocol.Tcp, e.Protocol);
         Assert.Equal("192.168.1.10", e.Local.ToString());
@@ -340,7 +348,7 @@ public class DecoderTests
     [Fact]
     public void UdpReceiveLocalIsDestination()
     {
-        var e = EtwDecoder.Decode(43, T, P(new() { ["PID"] = 7, ["size"] = 100, ["saddr"] = "1.1.1.1", ["daddr"] = "192.168.1.10", ["sport"] = 53, ["dport"] = 5555 }))!.Value;
+        var e = EtwDecoder.Decode(43, T, P(new() { ["PID"] = 7, ["size"] = 100, ["saddr"] = "1.1.1.1", ["daddr"] = "192.168.1.10", ["sport"] = Net(53), ["dport"] = Net(5555) }))!.Value;
         Assert.False(e.IsSend);
         Assert.Equal(FlowProtocol.Udp, e.Protocol);
         Assert.Equal("1.1.1.1", e.Remote.ToString());
@@ -352,7 +360,7 @@ public class DecoderTests
     public void Ipv6AndRawAddressForms()
     {
         var b = IPAddress.Parse("2001:db8::1").GetAddressBytes();
-        var e = EtwDecoder.Decode(26, T, P(new() { ["PID"] = 1, ["size"] = 1, ["saddr"] = b, ["daddr"] = IPAddress.Parse("2606:4700::1111"), ["sport"] = 1, ["dport"] = 2 }))!.Value;
+        var e = EtwDecoder.Decode(26, T, P(new() { ["PID"] = 1, ["size"] = 1, ["saddr"] = b, ["daddr"] = IPAddress.Parse("2606:4700::1111"), ["sport"] = Net(1), ["dport"] = Net(2) }))!.Value;
         Assert.Equal("2001:db8::1", e.Local.ToString());
         // IPv4 as a uint holding the bytes in network order (memory order 1.2.3.4)
         var ip = EtwDecoder.ToAddress(BitConverter.ToUInt32([1, 2, 3, 4], 0));

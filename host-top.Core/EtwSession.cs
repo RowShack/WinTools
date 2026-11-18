@@ -29,8 +29,8 @@ public static class EtwDecoder
             var size = ToLong(payload("size"));
             var daddr = ToAddress(payload("daddr"));
             var saddr = ToAddress(payload("saddr"));
-            var dport = ToInt(payload("dport"));
-            var sport = ToInt(payload("sport"));
+            var dport = ToPort(payload("dport"));
+            var sport = ToPort(payload("sport"));
             if (pid is null || daddr is null || saddr is null || dport is null || sport is null || size is null) return null;
             // Fields are packet-oriented: saddr/sport is the sender, daddr/dport the receiver.
             // For a send the local end is the source; for a receive the local end is the destination.
@@ -39,6 +39,17 @@ public static class EtwDecoder
                 : new FlowEvent(time, pid.Value, proto, daddr, dport.Value, saddr, sport.Value, size.Value, false);
         }
         catch { return null; }
+    }
+
+    /// <summary>
+    /// The provider stores ports in network byte order, and TraceEvent may hand them back as a signed or unsigned 16-bit value.
+    /// Take the low 16 bits unsigned and swap the bytes (confirmed on a real machine: 0x01BB arrives as 0xBB01).
+    /// </summary>
+    public static int? ToPort(object? o)
+    {
+        if (o is null) return null;
+        int v = Convert.ToInt32(o, System.Globalization.CultureInfo.InvariantCulture) & 0xFFFF;
+        return ((v & 0xFF) << 8) | (v >> 8);
     }
 
     private static int? ToInt(object? o) => o is null ? null : Convert.ToInt32(o, System.Globalization.CultureInfo.InvariantCulture);
