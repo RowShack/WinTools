@@ -111,9 +111,7 @@ public static class CommandGenerator
         if (r.Count > 1000) res.Warnings.Add("A trace count above 1000 produces a lot of output; use a smaller number if you can.");
 
         if (vdLine != null)
-        {
-            res.Start.Add("# Multi-VDOM units: run this inside the VDOM first ('config vdom' then 'edit <name>').");
-        }
+            res.Warnings.Add("Multi-VDOM units: run the commands inside the VDOM (type 'config vdom', then 'edit <name>') and use that VDOM's index here. Skip the VDOM field on single-VDOM units.");
         res.Start.Add("diagnose debug reset");
         if (vdLine != null) res.Start.Add(vdLine);
         res.Start.AddRange(filters);

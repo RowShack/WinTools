@@ -79,7 +79,8 @@ public static class InputReader
                     {
                         prev.Text += line;
                         prev.Raw += "\n" + raw;
-                        prevOpen = IsOpen(prev.Text);
+                        if (prev.Func != null && prev.Text.EndsWith('"')) { prev.Text = prev.Text[..^1]; prevOpen = false; }
+                        else prevOpen = IsOpen(prev.Text);
                         continue;
                     }
                     if (Prompt.IsMatch(line) || Noise.IsMatch(line)) { res.Ignored++; prev = null; prevOpen = false; continue; }

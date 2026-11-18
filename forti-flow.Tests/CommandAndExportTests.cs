@@ -23,7 +23,6 @@ public class CommandGeneratorTests
         Assert.True(r.Ok);
         Assert.Equal(new[]
         {
-            "# Multi-VDOM units: run this inside the VDOM first ('config vdom' then 'edit <name>').",
             "diagnose debug reset",
             "diagnose debug flow filter vd 0",
             "diagnose debug flow filter saddr 192.0.2.10",
@@ -35,7 +34,9 @@ public class CommandGeneratorTests
             "diagnose debug enable",
         }, r.Start.ToArray());
         Assert.Equal(new[] { "diagnose debug disable", "diagnose debug reset" }, r.Stop.ToArray());
-        Assert.NotEmpty(r.Warnings); // saddr+daddr hides replies
+        Assert.All(r.Start, l => Assert.StartsWith("diagnose ", l)); // pure commands, safe to paste
+        Assert.Contains(r.Warnings, w => w.Contains("Multi-VDOM"));
+        Assert.Contains(r.Warnings, w => w.Contains("saddr + daddr"));
     }
 
     [Fact]

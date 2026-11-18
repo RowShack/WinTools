@@ -115,6 +115,17 @@ public class AnalyzerTests
         Assert.All(later, p => Assert.Equal(Verdict.LocalIn, p.Verdict));
     }
 
+    [Theory]
+    [InlineData("gui-export-100-packets.csv")]
+    [InlineData("gui-export-1000-packets.csv")]
+    public void Samples_HaveNoUnrecognisedLines_AndCleanTitles(string file)
+    {
+        var r = FlowAnalyzer.Analyze(Sample(file), Rules);
+        Assert.Equal(0, r.UnknownLines);
+        foreach (var s in r.Packets.SelectMany(p => p.Steps).SelectMany(s => new[] { s }.Concat(s.Children)))
+            Assert.False(s.Title.EndsWith(',') || s.Title.EndsWith(':'), "title: " + s.Title);
+    }
+
     [Fact]
     public void Requests_AndReplies_AreLinkedBySessionId()
     {

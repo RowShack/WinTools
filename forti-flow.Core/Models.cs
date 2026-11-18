@@ -58,6 +58,8 @@ public sealed class PacketTrace
     public bool NoSession { get; set; }
     public bool HasHeader { get; set; }
     public bool IsFastPath { get; set; }
+    /// <summary>Fast path, or a packet whose session is merely being offloaded to the NPU: nothing more to see.</summary>
+    public bool IsOffloaded { get; set; }
     public string? Egress { get; set; }
     public string? OutDevice { get; set; }
     public string? Tunnel { get; set; }

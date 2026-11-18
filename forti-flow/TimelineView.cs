@@ -12,6 +12,15 @@ public sealed class TimelineView : Panel
     {
         Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true, Padding = new Padding(8),
     };
+    static readonly Dictionary<(string, float, FontStyle), Font> Fonts = new();
+    static Font F(string family, float size, FontStyle style = FontStyle.Regular)
+    {
+        var k = (family, size, style);
+        if (!Fonts.TryGetValue(k, out var f)) Fonts[k] = f = new Font(family, size, style);
+        return f;
+    }
+    int _cardW = 700, _inner = 670;
+    const int MaxSessionPackets = 8;
     readonly List<Control> _cards = new();
     readonly List<Label> _wraps = new();
     readonly List<Control> _wide = new();
@@ -72,12 +81,21 @@ public sealed class TimelineView : Panel
         var pk = s.Packets.Where(visible).ToList();
         var o = s.Packets.FirstOrDefault(x => x.Direction == "original") ?? s.Packets[0];
         var title = Lbl($"Session {s.Id}", 13, true, VerdictColor(s.Verdict));
+        var table = new System.Text.StringBuilder();
+        foreach (var p in pk)
+            table.AppendLine($"#{p.Index,-5} {(p.Direction == "reply" ? "reply   " : p.Direction == "original" ? "original" : "        ")}  {Exporter.VerdictText(p.Verdict),-9}  {p.Time}  {p.VerdictTitle}");
         var lines = new List<Control> { title, Wrap($"{o.ProtoName} {o.Src}:{o.SrcPort} → {o.Dst}:{o.DstPort}   ({s.Packets.Count} packets in this paste)", bold: true) };
-        foreach (var p in pk)
-            lines.Add(Wrap($"#{p.Index}   {(p.Direction == "reply" ? "reply   " : p.Direction == "original" ? "original" : "        ")}   {Exporter.VerdictText(p.Verdict),-9}   {p.Time}   {p.VerdictTitle}", mono: true));
+        var tbl = new TextBox
+        {
+            Multiline = true, ReadOnly = true, WordWrap = false, Font = F("Consolas", 9f), BackColor = Color.White, Text = table.ToString().TrimEnd(),
+            ScrollBars = pk.Count > 12 ? ScrollBars.Both : ScrollBars.None, Height = Math.Min(pk.Count, 12) * 15 + 10, Width = _inner, Margin = new Padding(0, 2, 0, 2),
+        };
+        _wide.Add(tbl); tbl.Disposed += (_, _) => _wide.Remove(tbl);
+        lines.Add(tbl);
         if (pk.Count < s.Packets.Count) lines.Add(Wrap($"{s.Packets.Count - pk.Count} packet(s) hidden by the current filters.", gray: true));
+        if (pk.Count > MaxSessionPackets) lines.Add(Wrap($"Timelines are shown for the first {MaxSessionPackets} packets only, to keep the window fast. Select any other packet in Packets mode for its full timeline.", bold: true));
         Add(Card(VerdictColor(s.Verdict), lines, 8));
-        foreach (var p in pk)
+        foreach (var p in pk.Take(MaxSessionPackets))
         {
             Add(Banner($"Packet {p.Label}   —   {Exporter.VerdictText(p.Verdict)}", VerdictColor(p.Verdict)));
             AddPacket(p, false);
@@ -153,7 +171,7 @@ public sealed class TimelineView : Panel
                 {
                     raw = new TextBox
                     {
-                        Multiline = true, ReadOnly = true, Font = new Font("Consolas", 9f), BackColor = Color.White, WordWrap = false,
+                        Multiline = true, ReadOnly = true, Font = F("Consolas", 9f), BackColor = Color.White, WordWrap = false,
                         ScrollBars = s.Lines.Count > 8 ? ScrollBars.Vertical : ScrollBars.None,
                         Text = string.Join(Environment.NewLine, s.Lines.Select(l => l.Raw.Replace("\n", " "))),
                         Height = Math.Min(s.Lines.Count, 8) * 17 + 8, Margin = new Padding(0, 2, 0, 0),
@@ -187,7 +205,7 @@ public sealed class TimelineView : Panel
     Control Banner(string text, Color col)
     {
         var l = Lbl(text, 10, true, Color.White);
-        l.BackColor = col; l.Padding = new Padding(8, 4, 8, 4); l.AutoSize = true; l.Margin = new Padding(0, 10, 0, 4);
+        l.BackColor = col; l.Padding = new Padding(8, 4, 8, 4); l.AutoSize = true; l.Margin = new Padding(0, 10, 0, 4); l.MinimumSize = new Size(_cardW, 0);
         _wraps.Add(l);
         return l;
     }
@@ -199,7 +217,10 @@ public sealed class TimelineView : Panel
             FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
             Padding = new Padding(stripeWidth + 10, 6, 8, 6), BackColor = Color.White, Margin = new Padding(0, 0, 0, 5),
         };
+        card.SuspendLayout();
         foreach (var c in content) { if (c is Label) c.Margin = new Padding(0, 1, 0, 1); card.Controls.Add(c); }
+        card.MinimumSize = new Size(_cardW, 0); card.MaximumSize = new Size(_cardW, 0);
+        card.ResumeLayout(true);
         return card;
     }
 
@@ -220,7 +241,7 @@ public sealed class TimelineView : Panel
         var l = new Label
         {
             Text = text, AutoSize = true, ForeColor = color,
-            Font = new Font("Segoe UI", size, bold ? FontStyle.Bold : FontStyle.Regular), Margin = new Padding(0, 1, 0, 1),
+            Font = F("Segoe UI", size, bold ? FontStyle.Bold : FontStyle.Regular), Margin = new Padding(0, 1, 0, 1), MaximumSize = new Size(_inner, 0),
         };
         _wraps.Add(l);
         return l;
@@ -231,8 +252,8 @@ public sealed class TimelineView : Panel
         var l = new Label
         {
             Text = text, AutoSize = true,
-            Font = mono ? new Font("Consolas", 9f) : new Font("Segoe UI", 9f, bold ? FontStyle.Bold : FontStyle.Regular),
-            ForeColor = gray ? Color.DimGray : Color.Black, Margin = new Padding(0, 1, 0, 1),
+            Font = mono ? F("Consolas", 9f) : F("Segoe UI", 9f, bold ? FontStyle.Bold : FontStyle.Regular),
+            ForeColor = gray ? Color.DimGray : Color.Black, Margin = new Padding(0, 1, 0, 1), MaximumSize = new Size(_inner, 0),
         };
         _wraps.Add(l);
         return l;
@@ -240,7 +261,7 @@ public sealed class TimelineView : Panel
 
     static Label Pill(string text, Color fore, Color back) => new()
     {
-        Text = text, AutoSize = true, ForeColor = fore, BackColor = back, Font = new Font("Segoe UI", 8f), Padding = new Padding(4, 1, 4, 1), Margin = new Padding(0, 1, 6, 0),
+        Text = text, AutoSize = true, ForeColor = fore, BackColor = back, Font = F("Segoe UI", 8f), Padding = new Padding(4, 1, 4, 1), Margin = new Padding(0, 1, 6, 0),
     };
 
     Control Badge(string text)
@@ -254,13 +275,15 @@ public sealed class TimelineView : Panel
     {
         if (_flow.ClientSize.Width < 100) return;
         int w = _flow.ClientSize.Width - _flow.Padding.Horizontal - SystemInformation.VerticalScrollBarWidth;
+        if (w == _cardW && !_wide.Any()) return;
+        _cardW = w; _inner = w - 30;
         _flow.SuspendLayout();
         foreach (var c in _cards)
         {
             c.MinimumSize = new Size(w, 0);
             c.MaximumSize = new Size(w, 0);
         }
-        int inner = w - 30;
+        int inner = _inner;
         foreach (var l in _wraps) l.MaximumSize = new Size(inner, 0);
         foreach (var t in _wide) t.Width = inner;
         _flow.ResumeLayout(true);

@@ -180,6 +180,15 @@
       "versions": ["7.4.12"]
     },
     {
+      "id": "trace-marker",
+      "pattern": "^trace$",
+      "card": "detail",
+      "title": "Trace marker",
+      "text": "{raw}",
+      "minor": true,
+      "versions": ["7.4.12"]
+    },
+    {
       "id": "npu-state",
       "pattern": "^ses->npu_state=",
       "card": "offload",
@@ -190,7 +199,7 @@
     },
     {
       "id": "offload-try",
-      "pattern": "^Trying to offloading session from (?<from>\\S+) to (?<to>\\S+)",
+      "pattern": "^Trying to offloading session from (?<from>[^\\s,]+) to (?<to>[^\\s,]+)",
       "card": "offload",
       "effect": "offload",
       "title": "Offload attempt {from} → {to}",

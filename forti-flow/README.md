@@ -27,9 +27,9 @@ Prompts (`FGT # ...`), timestamps, blank lines, CRLF, `--More--` and terminal-wr
 
 Toolbar on the *Packets* tab:
 
-- **Show: Packets / Sessions** - sessions link a request and its reply through the session id (`session-8c70da9f` / `id-8c70da9f`) and list their packets in order with direction (original / reply).
+- **Show: Packets / Sessions** - sessions link a request and its reply through the session id (`session-8c70da9f` / `id-8c70da9f`) and list their packets in order with direction (original / reply). Long sessions show full timelines for the first 8 packets only; select a packet in Packets mode for the rest.
 - **Filter** - matches addresses, ports, interface, policy id, tunnel, verdict, card text.
-- **Hide fast-path packets** - hides packets that only show `enter fast path` (established sessions).
+- **Hide fast-path / offloaded** - hides packets that only show `enter fast path` or an NPU offload attempt (established sessions; nothing more to see).
 - **Collapse policy checks** - folds the long run of `checked ... ret-no-match` lines into one card such as *Policy 281 matched after checking 5 others*; untick to see every check.
 - **Copy selected / Copy all / Export…** - clipboard and files (TXT summary, CSV with one row per packet, HTML report) for the packets currently shown.
 

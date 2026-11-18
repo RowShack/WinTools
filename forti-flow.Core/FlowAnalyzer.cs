@@ -201,6 +201,7 @@ public static class FlowAnalyzer
         else if (p.Egress == "root") { v = Verdict.LocalIn; deciding = c.Route; }
         else { v = Verdict.Unknown; }
 
+        p.IsOffloaded = p.IsFastPath || offloadKey;
         p.Verdict = v;
         p.Deciding = deciding;
         if (deciding != null) { deciding.IsDeciding = true; p.DecidedByUnverifiedRule = !deciding.Verified; }

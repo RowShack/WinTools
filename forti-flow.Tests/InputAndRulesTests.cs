@@ -63,6 +63,7 @@ public class InputFormatTests
         var p = Assert.Single(r.Packets);
         Assert.Equal("443", p.DstPort);
         Assert.Equal(Verdict.Forwarded, p.Verdict);
+        Assert.DoesNotContain(p.Lines, l => l.Text.EndsWith('"'));
     }
 
     [Fact]

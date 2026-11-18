@@ -29,7 +29,7 @@ public sealed class AnalyzerPage : UserControl
     // results tab
     readonly ComboBox _mode = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 100 };
     readonly TextBox _filter = new() { Width = 190, PlaceholderText = "ip, port, policy, verdict…" };
-    readonly CheckBox _hideFast = new() { Text = "Hide fast-path packets", AutoSize = true, Margin = new Padding(10, 6, 0, 0) };
+    readonly CheckBox _hideFast = new() { Text = "Hide fast-path / offloaded", AutoSize = true, Margin = new Padding(10, 6, 0, 0) };
     readonly CheckBox _collapse = new() { Text = "Collapse policy checks", AutoSize = true, Checked = true, Margin = new Padding(10, 6, 0, 0) };
     readonly Button _copy = new() { Text = "Copy selected", AutoSize = true };
     readonly Button _copyAll = new() { Text = "Copy all", AutoSize = true };
@@ -231,7 +231,7 @@ public sealed class AnalyzerPage : UserControl
         var f = _filter.Text.Trim();
         foreach (var p in src)
         {
-            if (_hideFast.Checked && p.IsFastPath) continue;
+            if (_hideFast.Checked && p.IsOffloaded) continue;
             if (f.Length > 0 && !Matches(p, f)) continue;
             yield return p;
         }
