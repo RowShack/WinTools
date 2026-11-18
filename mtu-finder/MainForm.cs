@@ -13,6 +13,9 @@ public sealed class MainForm : Form
     private readonly ComboBox _source = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 330 };
     private readonly NumericUpDown _tries = new() { Minimum = 1, Maximum = 10, Value = 3, Width = 55 };
     private readonly NumericUpDown _timeout = new() { Minimum = 200, Maximum = 10000, Value = 1500, Increment = 100, Width = 75 };
+    private readonly ComboBox _mode = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 260 };
+    private readonly NumericUpDown _port = new() { Minimum = 1, Maximum = 65535, Value = 443, Width = 75 };
+    private readonly Label _modeHint = new() { AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = SystemColors.GrayText, Margin = new Padding(0, 0, 0, 6) };
     private readonly Button _start = new() { Text = "Find MTU", Width = 110, Height = 30 };
     private readonly Button _cancel = new() { Text = "Cancel", Width = 90, Height = 30, Enabled = false };
     private readonly Label _verdict = new() { AutoSize = true, Font = new Font("Segoe UI", 13f, FontStyle.Bold), Text = "—" };
@@ -23,6 +26,8 @@ public sealed class MainForm : Form
 
     // ---- batch tab ----
     private readonly TextBox _batchInput = new() { Dock = DockStyle.Fill, Multiline = true, ScrollBars = ScrollBars.Vertical, AcceptsReturn = true, Font = new Font(FontFamily.GenericMonospace, 9.5f) };
+    private readonly CheckBox _batchFallback = new() { Text = "TCP estimate when ICMP gets no reply, port:", AutoSize = true, Margin = new Padding(12, 8, 0, 0) };
+    private readonly NumericUpDown _batchPort = new() { Minimum = 1, Maximum = 65535, Value = 443, Width = 75, Margin = new Padding(6, 5, 0, 0) };
     private readonly Button _batchRun = new() { Text = "Run batch", Width = 110, Height = 30 };
     private readonly Button _batchCancel = new() { Text = "Cancel", Width = 90, Height = 30, Enabled = false };
     private readonly Button _batchCsv = new() { Text = "Export CSV…", AutoSize = true, Enabled = false };
@@ -36,7 +41,7 @@ public sealed class MainForm : Form
 
     private readonly ToolStripStatusLabel _status = new("Ready");
     private CancellationTokenSource? _cts;
-    private MtuResult? _last;
+    private string? _lastText;
     private List<LocalInterface> _ifs4 = [], _ifs6 = [];
 
     public MainForm()
@@ -49,6 +54,9 @@ public sealed class MainForm : Form
 
         _family.Items.AddRange(["Auto", "IPv4", "IPv6"]);
         _family.SelectedIndex = 0;
+        _mode.Items.AddRange(["ICMP echo (measured)", "TCP connect (estimate only)"]);
+        _mode.SelectedIndex = 0;
+        _mode.SelectedIndexChanged += (_, _) => UpdateMode();
         _family.SelectedIndexChanged += (_, _) => LoadInterfaces();
 
         var tabs = new TabControl { Dock = DockStyle.Fill };
@@ -59,19 +67,19 @@ public sealed class MainForm : Form
         Controls.Add(tabs);
         Controls.Add(bar);
 
-        foreach (var (n, w) in new[] { ("Target", 160), ("Address", 160), ("Result", 180), ("Path MTU", 80), ("Max payload", 90), ("Suggested MSS", 100), ("Local MTU", 80), ("Notes", 400) })
+        foreach (var (n, w) in new[] { ("Target", 160), ("Address", 160), ("Result", 180), ("Path MTU", 80), ("Max payload", 90), ("Suggested MSS", 100), ("Local MTU", 80), ("TCP estimate (about)", 130), ("Notes", 400) })
             _grid.Columns.Add(n, n);
 
         _start.Click += async (_, _) => await RunSingleAsync();
         _cancel.Click += (_, _) => _cts?.Cancel();
         _target.KeyDown += async (_, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; await RunSingleAsync(); } };
-        _copy.Click += (_, _) => { if (_last != null) Clipboard.SetText(Describe(_last)); };
+        _copy.Click += (_, _) => { if (_lastText != null) Clipboard.SetText(_lastText); };
         _exportLog.Click += (_, _) => SaveText("mtu-log.txt", _log.Text);
         _batchRun.Click += async (_, _) => await RunBatchAsync();
         _batchCancel.Click += (_, _) => _cts?.Cancel();
         _batchCsv.Click += (_, _) => SaveText("mtu-batch.csv", GridCsv());
         _batchCopy.Click += (_, _) => Clipboard.SetText(GridText());
-        Shown += (_, _) => LoadInterfaces();
+        Shown += (_, _) => { LoadInterfaces(); UpdateMode(); };
     }
 
     // ---------------- layout ----------------
@@ -92,6 +100,10 @@ public sealed class MainForm : Form
         var opts = new FlowLayoutPanel { AutoSize = true, WrapContents = false };
         opts.Controls.AddRange([_tries, new Label { Text = "tries per size   timeout (ms):", AutoSize = true, Margin = new Padding(6, 6, 6, 0) }, _timeout]);
         Row("Probing:", opts);
+        var modeRow = new FlowLayoutPanel { AutoSize = true, WrapContents = false };
+        modeRow.Controls.AddRange([_mode, new Label { Text = "TCP port:", AutoSize = true, Margin = new Padding(12, 6, 6, 0) }, _port]);
+        Row("Method:", modeRow);
+        form.Controls.Add(new Label()); form.Controls.Add(_modeHint);
         var buttons = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0, 6, 0, 6) };
         buttons.Controls.AddRange([_start, _cancel, _copy, _exportLog]);
         form.Controls.Add(new Label()); form.Controls.Add(buttons);
@@ -128,7 +140,7 @@ public sealed class MainForm : Form
         var inputBox = new GroupBox { Text = "Targets (one per line, optional)", Dock = DockStyle.Left, Width = 300, Padding = new Padding(6) };
         inputBox.Controls.Add(_batchInput);
         var buttons = new FlowLayoutPanel { Dock = DockStyle.Top, AutoSize = true, WrapContents = false, Padding = new Padding(0, 0, 0, 6) };
-        buttons.Controls.AddRange([_batchRun, _batchCancel, _batchCsv, _batchCopy]);
+        buttons.Controls.AddRange([_batchRun, _batchCancel, _batchCsv, _batchCopy, _batchFallback, _batchPort]);
         var resultBox = new GroupBox { Text = "Results", Dock = DockStyle.Fill, Padding = new Padding(6) };
         resultBox.Controls.Add(_grid);
         var right = new Panel { Dock = DockStyle.Fill };
@@ -198,16 +210,34 @@ public sealed class MainForm : Form
         try
         {
             var progress = new Progress<ProbeAttempt>(a => { _log.AppendText(a + Environment.NewLine); _status.Text = $"Probing payload {a.PayloadSize}…"; });
-            var r = await ProbeOneAsync(host, _source.SelectedItem as LocalInterface, progress, _cts.Token);
-            _last = r;
-            ShowResult(r);
+            var tcpProgress = new Progress<TcpProbeAttempt>(a => { _log.AppendText(a + Environment.NewLine); _status.Text = $"TCP probing payload {a.PayloadSize}…"; });
+            var chosen = _source.SelectedItem as LocalInterface;
+            if (_mode.SelectedIndex == 1)
+                ShowTcp(await TcpOneAsync(host, chosen, (int)_port.Value, tcpProgress, _cts.Token));
+            else
+            {
+                var r = await ProbeOneAsync(host, chosen, progress, _cts.Token);
+                _lastText = Describe(r);
+                ShowResult(r);
+                if (r.Outcome == MtuOutcome.NoReply)
+                {
+                    var ask = MessageBox.Show(this,
+                        $"No ICMP reply, so the path MTU can't be measured.\n\nTry the TCP-based ESTIMATE instead? It connects to TCP port {(int)_port.Value} on the target and works out roughly what size segments get through. It is an estimate, not a measurement.",
+                        Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (ask == DialogResult.Yes)
+                    {
+                        _mode.SelectedIndex = 1;
+                        _log.AppendText("--- TCP estimate ---" + Environment.NewLine);
+                        ShowTcp(await TcpOneAsync(host, chosen, (int)_port.Value, tcpProgress, _cts.Token));
+                    }
+                }
+            }
         }
         catch (Exception ex) { _verdict.Text = "Error"; _verdict.ForeColor = Color.Firebrick; _details.Text = ex.Message; }
         finally { _cts.Dispose(); _cts = null; SetBusy(false); _status.Text = "Ready"; }
     }
 
-    /// <summary>Resolves, picks the interface, runs the search. Throws for resolve errors.</summary>
-    private async Task<MtuResult> ProbeOneAsync(string host, LocalInterface? chosen, IProgress<ProbeAttempt>? progress, CancellationToken ct)
+    private async Task<(IPAddress Ip, LocalInterface? Ifc, SearchOptions Opts)> PrepareAsync(string host, LocalInterface? chosen, CancellationToken ct)
     {
         bool? v6 = _family.SelectedIndex switch { 1 => false, 2 => true, _ => null };
         var ip = await NetInfo.ResolveAsync(host, v6, ct) ?? throw new InvalidOperationException($"Could not resolve '{host}'.");
@@ -215,8 +245,68 @@ public sealed class MainForm : Form
             throw new InvalidOperationException($"'{host}' has no {(want ? "IPv6" : "IPv4")} address.");
         var ifc = chosen is not null && chosen.Address!.AddressFamily == ip.AddressFamily ? chosen : NetInfo.InterfaceFor(ip);
         var opts = new SearchOptions { TriesPerSize = (int)_tries.Value, Timeout = TimeSpan.FromMilliseconds((double)_timeout.Value), LocalMtu = ifc?.Mtu };
+        return (ip, ifc, opts);
+    }
+
+    /// <summary>Resolves, picks the interface, runs the search. Throws for resolve errors.</summary>
+    private async Task<MtuResult> ProbeOneAsync(string host, LocalInterface? chosen, IProgress<ProbeAttempt>? progress, CancellationToken ct)
+    {
+        var (ip, ifc, opts) = await PrepareAsync(host, chosen, ct);
         return await new MtuSearcher(new IcmpProbe(ifc?.Address), opts).RunAsync(ip, progress, ct);
     }
+
+    private async Task<TcpMtuEstimate> TcpOneAsync(string host, LocalInterface? chosen, int port, IProgress<TcpProbeAttempt>? progress, CancellationToken ct)
+    {
+        var (ip, ifc, opts) = await PrepareAsync(host, chosen, ct);
+        return await new TcpMtuEstimator(new TcpPathProbe(ifc?.Address), opts).RunAsync(ip, port, progress, ct);
+    }
+
+    private void UpdateMode()
+    {
+        bool tcp = _mode.SelectedIndex == 1;
+        _port.Enabled = tcp;
+        _modeHint.Text = tcp
+            ? "ESTIMATE: connects to the TCP port and sends segments of increasing size. Use it when ICMP is filtered. Needs an open port; can be wrong if a middlebox clamps MSS."
+            : "Measured with ICMP echo and Don't-Fragment. If there is no reply you will be offered the TCP estimate.";
+    }
+
+    private void ShowTcp(TcpMtuEstimate r)
+    {
+        switch (r.Outcome)
+        {
+            case TcpEstimateOutcome.Estimated:
+                _verdict.Text = $"Estimated path MTU about {r.EstimatedMtu} (TCP, estimate)";
+                _verdict.ForeColor = Color.DarkOrange;
+                break;
+            case TcpEstimateOutcome.ConnectFailed: _verdict.Text = $"Could not connect to port {r.Port}"; _verdict.ForeColor = Color.Firebrick; break;
+            case TcpEstimateOutcome.Inconclusive: _verdict.Text = "TCP estimate inconclusive"; _verdict.ForeColor = Color.Firebrick; break;
+            default: _verdict.Text = "Cancelled"; _verdict.ForeColor = SystemColors.GrayText; break;
+        }
+        _lastText = DescribeTcp(r);
+        _details.Text = _lastText;
+    }
+
+    private static string DescribeTcp(TcpMtuEstimate r)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"Target: {r.Target}:{r.Port} ({(r.IsV6 ? "IPv6" : "IPv4")}) via TCP: ESTIMATE, not a measurement");
+        if (r.EstimatedMtu is int mtu)
+        {
+            sb.AppendLine($"Estimated path MTU: about {mtu}; suggested TCP MSS about {r.EstimatedMss}");
+            sb.AppendLine("Caveat: this can be wrong when a firewall, VPN or proxy rewrites (clamps) the MSS or terminates the TCP connection.");
+        }
+        if (r.NegotiatedMss is int m) sb.AppendLine($"MSS negotiated on connect: {m}");
+        foreach (var n in r.Notes) sb.AppendLine("Note: " + n);
+        return sb.ToString().TrimEnd();
+    }
+
+    private static string TcpCell(TcpMtuEstimate t) => t.Outcome switch
+    {
+        TcpEstimateOutcome.Estimated => $"about {t.EstimatedMtu} (estimate)",
+        TcpEstimateOutcome.ConnectFailed => $"port {t.Port}: no connection",
+        TcpEstimateOutcome.Inconclusive => "inconclusive",
+        _ => "",
+    };
 
     private void ShowResult(MtuResult r)
     {
@@ -265,15 +355,23 @@ public sealed class MainForm : Form
             {
                 _cts.Token.ThrowIfCancellationRequested();
                 _status.Text = $"Batch {++n}/{targets.Count}: {t}";
-                int row = _grid.Rows.Add(t, "", "Working…", "", "", "", "", "");
+                int row = _grid.Rows.Add(t, "", "Working…", "", "", "", "", "", "");
                 try
                 {
                     var r = await ProbeOneAsync(t, null, null, _cts.Token);
                     if (r.Outcome == MtuOutcome.Cancelled) { _grid.Rows[row].Cells[2].Value = "Cancelled"; break; }
-                    _grid.Rows[row].SetValues(t, r.Target, r.Outcome, r.PathMtu, r.MaxPayload, r.RecommendedMss, r.LocalInterfaceMtu, string.Join(" ", r.Notes));
+                    string tcp = "";
+                    if (r.Outcome == MtuOutcome.NoReply && _batchFallback.Checked)
+                    {
+                        _status.Text = $"Batch {n}/{targets.Count}: {t} (TCP estimate)";
+                        var te = await TcpOneAsync(t, null, (int)_batchPort.Value, null, _cts.Token);
+                        if (te.Outcome == TcpEstimateOutcome.Cancelled) { _grid.Rows[row].Cells[2].Value = "Cancelled"; break; }
+                        tcp = TcpCell(te);
+                    }
+                    _grid.Rows[row].SetValues(t, r.Target, r.Outcome, r.PathMtu, r.MaxPayload, r.RecommendedMss, r.LocalInterfaceMtu, tcp, string.Join(" ", r.Notes));
                 }
                 catch (OperationCanceledException) { _grid.Rows[row].Cells[2].Value = "Cancelled"; break; }
-                catch (Exception ex) { _grid.Rows[row].SetValues(t, "", "Error", "", "", "", "", ex.Message); }
+                catch (Exception ex) { _grid.Rows[row].SetValues(t, "", "Error", "", "", "", "", "", ex.Message); }
             }
         }
         catch (OperationCanceledException) { }

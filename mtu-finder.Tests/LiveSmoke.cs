@@ -7,6 +7,22 @@ namespace MtuFinder.Tests;
 public class LiveSmoke
 {
     [Fact]
+    public async Task LiveTcp()
+    {
+        if (Environment.GetEnvironmentVariable("WINTOOLS_LIVE") != "1") return;
+        foreach (var (t, port) in new[] { ("1.1.1.1", 443), ("1.1.1.1", 80), ("8.8.8.8", 443) })
+        {
+            var ip = IPAddress.Parse(t);
+            var ifc = NetInfo.InterfaceFor(ip);
+            var r = await new TcpMtuEstimator(new TcpPathProbe(ifc?.Address),
+                new SearchOptions { LocalMtu = ifc?.Mtu, Timeout = TimeSpan.FromMilliseconds(1500) }).RunAsync(ip, port);
+            Console.WriteLine($"TCP {t}:{port}: {r.Outcome} mss={r.NegotiatedMss} mtu={r.EstimatedMtu} local={ifc?.Mtu}");
+            foreach (var a in r.Attempts.TakeLast(8)) Console.WriteLine("   " + a);
+            foreach (var n in r.Notes) Console.WriteLine("   NOTE " + n);
+        }
+    }
+
+    [Fact]
     public async Task Live()
     {
         if (Environment.GetEnvironmentVariable("WINTOOLS_LIVE") != "1") return;
