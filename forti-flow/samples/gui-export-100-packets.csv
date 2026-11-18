@@ -1,0 +1,893 @@
+﻿Time,Message
+
+43
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:9249->192.168.10.18:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=9249, seq=11146."
+2026/11/18 21:13:01,allocate a new session-8c70da9f
+2026/11/18 21:13:01,"in-[Software-Switch], out-[]"
+2026/11/18 21:13:01,len=0
+2026/11/18 21:13:01,"result: skb_flags-02000000, vid-0, ret-no-match, act-accept, flag-00000000"
+2026/11/18 21:13:01,find a route: flag=04000000 gw-192.168.10.18 via Switch-Uplink
+2026/11/18 21:13:01,"in-[Software-Switch], out-[Switch-Uplink], skb_flags-02000000, vid-0, app_id: 0, url_cat_id: 0"
+2026/11/18 21:13:01,"gnum-100004, use int hash, slot=13, len=21"
+2026/11/18 21:13:01,"checked gnum-100004 policy-4294967295, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-178, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-274, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-122, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-124, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-281, ret-matched, act-accept"
+2026/11/18 21:13:01,ret-matched
+2026/11/18 21:13:01,"policy-281 is matched, act-accept"
+2026/11/18 21:13:01,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:01,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:01,"in-[Software-Switch], out-[Switch-Uplink], skb_flags-02000000, vid-0"
+2026/11/18 21:13:01,"gnum-100015, check-ffffffffa002e2c0"
+2026/11/18 21:13:01,"checked gnum-100015 policy-1, ret-no-match, act-accept"
+2026/11/18 21:13:01,"gnum-100015 check result: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:01,"after check: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:01,Allowed by Policy-281:
+
+44
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 192.168.10.18:9249->10.0.200.82:0) tun_id=0.0.0.0 from Switch-Uplink. type=0, code=0, id=9249, seq=11146."
+2026/11/18 21:13:01,"Find an existing session, id-8c70da9f, reply direction"
+2026/11/18 21:13:01,find a route: flag=04000000 gw-10.0.200.82 via Software-Switch
+2026/11/18 21:13:01,ses->npu_state=0x100 skb->npu_flag=0x0
+2026/11/18 21:13:01,ses->npu_state=0x40108 skb->npu_flag=0x0
+2026/11/18 21:13:01,"Trying to offloading session from Switch-Uplink to Software-Switch, skb.npu_flag=00000000 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+45
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:10748->10.0.47.28:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10748, seq=1355."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a74, original direction"
+2026/11/18 21:13:01,enter fast path
+
+46
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:10761->10.0.47.180:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10761, seq=1355."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a73, original direction"
+2026/11/18 21:13:01,enter fast path
+
+47
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=17, 10.0.200.82:54203->10.0.47.157:161) tun_id=0.0.0.0 from Software-Switch. "
+2026/11/18 21:13:01,"Find an existing session, id-8c70a1b3, original direction"
+2026/11/18 21:13:01,"Trying to offloading session from Software-Switch to VLAN50, skb.npu_flag=00000400 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+
+48
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:7517->192.168.5.149:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=7517, seq=11146."
+2026/11/18 21:13:01,allocate a new session-8c70daa0
+2026/11/18 21:13:01,"in-[Software-Switch], out-[]"
+2026/11/18 21:13:01,len=0
+2026/11/18 21:13:01,"result: skb_flags-02000000, vid-0, ret-no-match, act-accept, flag-00000000"
+2026/11/18 21:13:01,find a route: flag=04000000 gw-192.168.5.149 via VLAN5
+2026/11/18 21:13:01,"in-[Software-Switch], out-[VLAN5], skb_flags-02000000, vid-0, app_id: 0, url_cat_id: 0"
+2026/11/18 21:13:01,"gnum-100004, use int hash, slot=20, len=26"
+2026/11/18 21:13:01,"checked gnum-100004 policy-4294967295, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-122, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-124, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-281, ret-matched, act-accept"
+2026/11/18 21:13:01,ret-matched
+2026/11/18 21:13:01,"policy-281 is matched, act-accept"
+2026/11/18 21:13:01,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:01,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:01,"in-[Software-Switch], out-[VLAN5], skb_flags-02000000, vid-0"
+2026/11/18 21:13:01,"gnum-100015, check-ffffffffa002e2c0"
+2026/11/18 21:13:01,"checked gnum-100015 policy-1, ret-no-match, act-accept"
+2026/11/18 21:13:01,"gnum-100015 check result: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:01,"after check: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:01,Allowed by Policy-281:
+
+49
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.47.180:10761->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10761, seq=1355."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a73, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+50
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:7499->192.168.5.125:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=7499, seq=11146."
+2026/11/18 21:13:01,allocate a new session-8c70daa1
+2026/11/18 21:13:01,"in-[Software-Switch], out-[]"
+2026/11/18 21:13:01,len=0
+2026/11/18 21:13:01,"result: skb_flags-02000000, vid-0, ret-no-match, act-accept, flag-00000000"
+2026/11/18 21:13:01,find a route: flag=04000000 gw-192.168.5.125 via VLAN5
+2026/11/18 21:13:01,"in-[Software-Switch], out-[VLAN5], skb_flags-02000000, vid-0, app_id: 0, url_cat_id: 0"
+2026/11/18 21:13:01,"gnum-100004, use int hash, slot=20, len=26"
+2026/11/18 21:13:01,"checked gnum-100004 policy-4294967295, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-122, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-124, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-281, ret-matched, act-accept"
+2026/11/18 21:13:01,ret-matched
+2026/11/18 21:13:01,"policy-281 is matched, act-accept"
+2026/11/18 21:13:01,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:01,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:01,"in-[Software-Switch], out-[VLAN5], skb_flags-02000000, vid-0"
+2026/11/18 21:13:01,"gnum-100015, check-ffffffffa002e2c0"
+2026/11/18 21:13:01,"checked gnum-100015 policy-1, ret-no-match, act-accept"
+2026/11/18 21:13:01,"gnum-100015 check result: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:01,"after check: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:01,Allowed by Policy-281:
+
+51
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=17, 10.0.200.82:62982->10.0.220.11:161) tun_id=0.0.0.0 from Software-Switch. "
+2026/11/18 21:13:01,allocate a new session-8c70daa2
+2026/11/18 21:13:01,"in-[Software-Switch], out-[]"
+2026/11/18 21:13:01,len=0
+2026/11/18 21:13:01,"result: skb_flags-02000000, vid-0, ret-no-match, act-accept, flag-00000000"
+2026/11/18 21:13:01,find a route: flag=04000000 gw-10.0.220.11 via VLAN40
+2026/11/18 21:13:01,"in-[Software-Switch], out-[VLAN40], skb_flags-02000000, vid-0, app_id: 0, url_cat_id: 0"
+2026/11/18 21:13:01,"gnum-100004, use addr/intf hash, len=61"
+2026/11/18 21:13:01,"checked gnum-100004 policy-4294967295, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-207, ret-no-match, act-accept"
+2026/11/18 21:13:01,gnum-100004 policy-253 is not active
+2026/11/18 21:13:01,gnum-100004 policy-197 is not active
+2026/11/18 21:13:01,gnum-100004 policy-198 is not active
+2026/11/18 21:13:01,"checked gnum-100004 policy-191, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-192, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-179, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-171, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-167, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-163, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-143, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-282, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-108, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-279, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-130, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-131, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-278, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-281, ret-matched, act-accept"
+2026/11/18 21:13:01,ret-matched
+2026/11/18 21:13:01,"policy-281 is matched, act-accept"
+2026/11/18 21:13:01,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:01,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:01,"in-[Software-Switch], out-[VLAN40], skb_flags-02000000, vid-0"
+2026/11/18 21:13:01,"gnum-100015, check-ffffffffa002e2c0"
+2026/11/18 21:13:01,"checked gnum-100015 policy-1, ret-no-match, act-accept"
+2026/11/18 21:13:01,"gnum-100015 check result: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:01,"after check: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:01,Allowed by Policy-281:
+
+52
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.47.28:10748->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10748, seq=1355."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a74, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+53
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 192.168.5.125:7499->10.0.200.82:0) tun_id=0.0.0.0 from VLAN5. type=0, code=0, id=7499, seq=11146."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa1, reply direction"
+2026/11/18 21:13:01,find a route: flag=04000000 gw-10.0.200.82 via Software-Switch
+2026/11/18 21:13:01,ses->npu_state=0x100 skb->npu_flag=0x0
+2026/11/18 21:13:01,ses->npu_state=0x40108 skb->npu_flag=0x0
+2026/11/18 21:13:01,"Trying to offloading session from VLAN5 to Software-Switch, skb.npu_flag=00000000 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+54
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 192.168.5.149:7517->10.0.200.82:0) tun_id=0.0.0.0 from VLAN5. type=0, code=0, id=7517, seq=11146."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa0, reply direction"
+2026/11/18 21:13:01,find a route: flag=04000000 gw-10.0.200.82 via Software-Switch
+2026/11/18 21:13:01,ses->npu_state=0x100 skb->npu_flag=0x0
+2026/11/18 21:13:01,ses->npu_state=0x40108 skb->npu_flag=0x0
+2026/11/18 21:13:01,"Trying to offloading session from VLAN5 to Software-Switch, skb.npu_flag=00000000 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+55
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:11374->10.0.47.25:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=11374, seq=11146."
+2026/11/18 21:13:01,allocate a new session-8c70daa3
+2026/11/18 21:13:01,"in-[Software-Switch], out-[]"
+2026/11/18 21:13:01,len=0
+2026/11/18 21:13:01,"result: skb_flags-02000000, vid-0, ret-no-match, act-accept, flag-00000000"
+2026/11/18 21:13:01,find a route: flag=04000000 gw-10.0.47.25 via VLAN50
+2026/11/18 21:13:01,"in-[Software-Switch], out-[VLAN50], skb_flags-02000000, vid-0, app_id: 0, url_cat_id: 0"
+2026/11/18 21:13:01,"gnum-100004, use int hash, slot=22, len=25"
+2026/11/18 21:13:01,"checked gnum-100004 policy-4294967295, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-131, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-113, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-202, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-146, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-122, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-124, ret-no-match, act-accept"
+2026/11/18 21:13:01,"checked gnum-100004 policy-281, ret-matched, act-accept"
+2026/11/18 21:13:01,ret-matched
+2026/11/18 21:13:01,"policy-281 is matched, act-accept"
+2026/11/18 21:13:01,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:01,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:01,"in-[Software-Switch], out-[VLAN50], skb_flags-02000000, vid-0"
+2026/11/18 21:13:01,"gnum-100015, check-ffffffffa002e2c0"
+2026/11/18 21:13:01,"checked gnum-100015 policy-1, ret-no-match, act-accept"
+2026/11/18 21:13:01,"gnum-100015 check result: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:01,"after check: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:01,Allowed by Policy-281:
+
+56
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.47.25:11374->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=11374, seq=11146."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa3, reply direction"
+2026/11/18 21:13:01,find a route: flag=04000000 gw-10.0.200.82 via Software-Switch
+2026/11/18 21:13:01,ses->npu_state=0x100 skb->npu_flag=0x0
+2026/11/18 21:13:01,ses->npu_state=0x40108 skb->npu_flag=0x0
+2026/11/18 21:13:01,"Trying to offloading session from VLAN50 to Software-Switch, skb.npu_flag=00000000 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+57
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:9249->192.168.10.18:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=9249, seq=11147."
+2026/11/18 21:13:01,"Find an existing session, id-8c70da9f, original direction"
+2026/11/18 21:13:01,"Trying to offloading session from Software-Switch to Switch-Uplink, skb.npu_flag=00000400 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+
+58
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 192.168.10.18:9249->10.0.200.82:0) tun_id=0.0.0.0 from Switch-Uplink. type=0, code=0, id=9249, seq=11147."
+2026/11/18 21:13:01,"Find an existing session, id-8c70da9f, reply direction"
+2026/11/18 21:13:01,ses->npu_state=0x40108 skb->npu_flag=0x400
+2026/11/18 21:13:01,ses->npu_state=0x40108 skb->npu_flag=0x400
+2026/11/18 21:13:01,"Trying to offloading session from Switch-Uplink to Software-Switch, skb.npu_flag=00000400 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+59
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:10748->10.0.47.28:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10748, seq=1356."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a74, original direction"
+2026/11/18 21:13:01,enter fast path
+
+60
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:10761->10.0.47.180:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10761, seq=1356."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a73, original direction"
+2026/11/18 21:13:01,enter fast path
+
+61
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:7499->192.168.5.125:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=7499, seq=11147."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa1, original direction"
+2026/11/18 21:13:01,"Trying to offloading session from Software-Switch to VLAN5, skb.npu_flag=00000400 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+
+62
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 192.168.5.125:7499->10.0.200.82:0) tun_id=0.0.0.0 from VLAN5. type=0, code=0, id=7499, seq=11147."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa1, reply direction"
+2026/11/18 21:13:01,ses->npu_state=0x40108 skb->npu_flag=0x400
+2026/11/18 21:13:01,ses->npu_state=0x40108 skb->npu_flag=0x400
+2026/11/18 21:13:01,"Trying to offloading session from VLAN5 to Software-Switch, skb.npu_flag=00000400 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+63
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.47.180:10761->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10761, seq=1356."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a73, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+64
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:7517->192.168.5.149:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=7517, seq=11147."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa0, original direction"
+2026/11/18 21:13:01,"Trying to offloading session from Software-Switch to VLAN5, skb.npu_flag=00000400 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+
+65
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.47.28:10748->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10748, seq=1356."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a74, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+66
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 192.168.5.149:7517->10.0.200.82:0) tun_id=0.0.0.0 from VLAN5. type=0, code=0, id=7517, seq=11147."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa0, reply direction"
+2026/11/18 21:13:01,ses->npu_state=0x40108 skb->npu_flag=0x400
+2026/11/18 21:13:01,ses->npu_state=0x40108 skb->npu_flag=0x400
+2026/11/18 21:13:01,"Trying to offloading session from VLAN5 to Software-Switch, skb.npu_flag=00000400 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+67
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.220.11:0->10.0.200.82:771) tun_id=0.0.0.0 from VLAN40. type=3, code=3, id=0, seq=0."
+2026/11/18 21:13:01,find a route: flag=04000000 gw-10.0.200.82 via Software-Switch
+2026/11/18 21:13:01,ses->npu_state=0x100 skb->npu_flag=0x0
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+68
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:11374->10.0.47.25:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=11374, seq=11147."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa3, original direction"
+2026/11/18 21:13:01,"Trying to offloading session from Software-Switch to VLAN50, skb.npu_flag=00000400 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+
+69
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.47.25:11374->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=11374, seq=11147."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa3, reply direction"
+2026/11/18 21:13:01,ses->npu_state=0x40108 skb->npu_flag=0x400
+2026/11/18 21:13:01,ses->npu_state=0x40108 skb->npu_flag=0x400
+2026/11/18 21:13:01,"Trying to offloading session from VLAN50 to Software-Switch, skb.npu_flag=00000400 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+70
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=17, 10.0.47.157:161->10.0.200.82:54203) tun_id=0.0.0.0 from VLAN50. "
+2026/11/18 21:13:01,"Find an existing session, id-8c70a1b3, reply direction"
+2026/11/18 21:13:01,ses->npu_state=0x40108 skb->npu_flag=0x400
+2026/11/18 21:13:01,ses->npu_state=0x40108 skb->npu_flag=0x400
+2026/11/18 21:13:01,"Trying to offloading session from VLAN50 to Software-Switch, skb.npu_flag=00000400 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+71
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:9249->192.168.10.18:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=9249, seq=11148."
+2026/11/18 21:13:01,"Find an existing session, id-8c70da9f, original direction"
+2026/11/18 21:13:01,"Trying to offloading session from Software-Switch to Switch-Uplink, skb.npu_flag=00000400 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+
+72
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 192.168.10.18:9249->10.0.200.82:0) tun_id=0.0.0.0 from Switch-Uplink. type=0, code=0, id=9249, seq=11148."
+2026/11/18 21:13:01,"Find an existing session, id-8c70da9f, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+73
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:10761->10.0.47.180:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10761, seq=1357."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a73, original direction"
+2026/11/18 21:13:01,enter fast path
+
+74
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:10748->10.0.47.28:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10748, seq=1357."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a74, original direction"
+2026/11/18 21:13:01,enter fast path
+
+75
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:7499->192.168.5.125:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=7499, seq=11148."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa1, original direction"
+2026/11/18 21:13:01,"Trying to offloading session from Software-Switch to VLAN5, skb.npu_flag=00000400 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+
+76
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 192.168.5.125:7499->10.0.200.82:0) tun_id=0.0.0.0 from VLAN5. type=0, code=0, id=7499, seq=11148."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa1, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+77
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=17, 10.0.200.82:63079->10.0.220.11:161) tun_id=0.0.0.0 from Software-Switch. "
+2026/11/18 21:13:01,"Find an existing session, id-8c70d710, original direction"
+2026/11/18 21:13:01,"Trying to offloading session from Software-Switch to VLAN40, skb.npu_flag=00000400 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000005, npu_state=00040108"
+
+78
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:7517->192.168.5.149:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=7517, seq=11148."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa0, original direction"
+2026/11/18 21:13:01,"Trying to offloading session from Software-Switch to VLAN5, skb.npu_flag=00000400 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+
+79
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.47.180:10761->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10761, seq=1357."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a73, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+80
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 192.168.5.149:7517->10.0.200.82:0) tun_id=0.0.0.0 from VLAN5. type=0, code=0, id=7517, seq=11148."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa0, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+81
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.47.28:10748->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10748, seq=1357."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a74, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+82
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:11374->10.0.47.25:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=11374, seq=11148."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa3, original direction"
+2026/11/18 21:13:01,"Trying to offloading session from Software-Switch to VLAN50, skb.npu_flag=00000400 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:01,"state=00000204, state2=00000001, npu_state=00040108"
+
+83
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.47.25:11374->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=11374, seq=11148."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa3, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+84
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:9249->192.168.10.18:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=9249, seq=11149."
+2026/11/18 21:13:01,"Find an existing session, id-8c70da9f, original direction"
+2026/11/18 21:13:01,enter fast path
+
+85
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 192.168.10.18:9249->10.0.200.82:0) tun_id=0.0.0.0 from Switch-Uplink. type=0, code=0, id=9249, seq=11149."
+2026/11/18 21:13:01,"Find an existing session, id-8c70da9f, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+86
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:10761->10.0.47.180:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10761, seq=1358."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a73, original direction"
+2026/11/18 21:13:01,enter fast path
+
+87
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:7499->192.168.5.125:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=7499, seq=11149."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa1, original direction"
+2026/11/18 21:13:01,enter fast path
+
+88
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:10748->10.0.47.28:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10748, seq=1358."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a74, original direction"
+2026/11/18 21:13:01,enter fast path
+
+89
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 192.168.5.125:7499->10.0.200.82:0) tun_id=0.0.0.0 from VLAN5. type=0, code=0, id=7499, seq=11149."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa1, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+90
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.47.180:10761->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10761, seq=1358."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a73, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+91
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.47.28:10748->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10748, seq=1358."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a74, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+92
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:7517->192.168.5.149:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=7517, seq=11149."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa0, original direction"
+2026/11/18 21:13:01,enter fast path
+
+93
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 192.168.5.149:7517->10.0.200.82:0) tun_id=0.0.0.0 from VLAN5. type=0, code=0, id=7517, seq=11149."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa0, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+94
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:11374->10.0.47.25:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=11374, seq=11149."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa3, original direction"
+2026/11/18 21:13:01,enter fast path
+
+95
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.47.25:11374->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=11374, seq=11149."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa3, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+96
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:9249->192.168.10.18:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=9249, seq=11150."
+2026/11/18 21:13:01,"Find an existing session, id-8c70da9f, original direction"
+2026/11/18 21:13:01,enter fast path
+
+97
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 192.168.10.18:9249->10.0.200.82:0) tun_id=0.0.0.0 from Switch-Uplink. type=0, code=0, id=9249, seq=11150."
+2026/11/18 21:13:01,"Find an existing session, id-8c70da9f, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+98
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:10761->10.0.47.180:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10761, seq=1359."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a73, original direction"
+2026/11/18 21:13:01,enter fast path
+
+99
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:7499->192.168.5.125:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=7499, seq=11150."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa1, original direction"
+2026/11/18 21:13:01,enter fast path
+
+100
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 192.168.5.125:7499->10.0.200.82:0) tun_id=0.0.0.0 from VLAN5. type=0, code=0, id=7499, seq=11150."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa1, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+101
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.47.180:10761->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10761, seq=1359."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a73, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+102
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:7517->192.168.5.149:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=7517, seq=11150."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa0, original direction"
+2026/11/18 21:13:01,enter fast path
+
+103
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:10748->10.0.47.28:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10748, seq=1359."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a74, original direction"
+2026/11/18 21:13:01,enter fast path
+
+104
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.200.82:11374->10.0.47.25:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=11374, seq=11150."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa3, original direction"
+2026/11/18 21:13:01,enter fast path
+
+105
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.47.25:11374->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=11374, seq=11150."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa3, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+106
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 192.168.5.149:7517->10.0.200.82:0) tun_id=0.0.0.0 from VLAN5. type=0, code=0, id=7517, seq=11150."
+2026/11/18 21:13:01,"Find an existing session, id-8c70daa0, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+107
+2026/11/18 21:13:01,"vd-root:0 received a packet(proto=1, 10.0.47.28:10748->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10748, seq=1359."
+2026/11/18 21:13:01,"Find an existing session, id-8c709a74, reply direction"
+2026/11/18 21:13:01,enter fast path
+2026/11/18 21:13:01,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+108
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=17, 10.0.200.82:62983->10.0.220.11:161) tun_id=0.0.0.0 from Software-Switch. "
+2026/11/18 21:13:02,allocate a new session-8c70daa6
+2026/11/18 21:13:02,"in-[Software-Switch], out-[]"
+2026/11/18 21:13:02,len=0
+2026/11/18 21:13:02,"result: skb_flags-02000000, vid-0, ret-no-match, act-accept, flag-00000000"
+2026/11/18 21:13:02,find a route: flag=04000000 gw-10.0.220.11 via VLAN40
+2026/11/18 21:13:02,"in-[Software-Switch], out-[VLAN40], skb_flags-02000000, vid-0, app_id: 0, url_cat_id: 0"
+2026/11/18 21:13:02,"gnum-100004, use addr/intf hash, len=61"
+2026/11/18 21:13:02,"checked gnum-100004 policy-4294967295, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-207, ret-no-match, act-accept"
+2026/11/18 21:13:02,gnum-100004 policy-253 is not active
+2026/11/18 21:13:02,gnum-100004 policy-197 is not active
+2026/11/18 21:13:02,gnum-100004 policy-198 is not active
+2026/11/18 21:13:02,"checked gnum-100004 policy-191, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-192, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-179, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-171, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-167, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-163, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-143, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-282, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-108, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-279, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-130, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-131, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-278, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-281, ret-matched, act-accept"
+2026/11/18 21:13:02,ret-matched
+2026/11/18 21:13:02,"policy-281 is matched, act-accept"
+2026/11/18 21:13:02,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:02,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:02,"in-[Software-Switch], out-[VLAN40], skb_flags-02000000, vid-0"
+2026/11/18 21:13:02,"gnum-100015, check-ffffffffa002e2c0"
+2026/11/18 21:13:02,"checked gnum-100015 policy-1, ret-no-match, act-accept"
+2026/11/18 21:13:02,"gnum-100015 check result: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:02,"after check: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:02,Allowed by Policy-281:
+
+109
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.200.82:10730->10.0.47.13:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10730, seq=64064."
+2026/11/18 21:13:02,"Find an existing session, id-8c709a77, original direction"
+2026/11/18 21:13:02,enter fast path
+
+110
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=6, 10.0.47.179:445->10.0.200.82:62316) tun_id=0.0.0.0 from VLAN50. flag [.], seq 255771029, ack 391285830, win 1023"
+2026/11/18 21:13:02,find a route: flag=04000000 gw-10.0.200.82 via Software-Switch
+2026/11/18 21:13:02,no session matched
+
+111
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=6, 10.0.47.194:445->10.0.200.82:60060) tun_id=0.0.0.0 from VLAN50. flag [.], seq 2441497534, ack 2670042450, win 8202"
+2026/11/18 21:13:02,find a route: flag=04000000 gw-10.0.200.82 via Software-Switch
+2026/11/18 21:13:02,no session matched
+
+112
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=6, 10.0.47.194:445->10.0.200.82:60059) tun_id=0.0.0.0 from VLAN50. flag [.], seq 3680340691, ack 367516672, win 8198"
+2026/11/18 21:13:02,find a route: flag=04000000 gw-10.0.200.82 via Software-Switch
+2026/11/18 21:13:02,no session matched
+
+113
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.200.82:10731->10.0.47.26:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10731, seq=1365."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b44, original direction"
+2026/11/18 21:13:02,enter fast path
+
+114
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.200.82:10764->10.0.210.36:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10764, seq=1365."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b49, original direction"
+2026/11/18 21:13:02,enter fast path
+
+115
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.200.82:9799->192.168.5.158:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=9799, seq=11146."
+2026/11/18 21:13:02,allocate a new session-8c70db53
+2026/11/18 21:13:02,"in-[Software-Switch], out-[]"
+2026/11/18 21:13:02,len=0
+2026/11/18 21:13:02,"result: skb_flags-02000000, vid-0, ret-no-match, act-accept, flag-00000000"
+2026/11/18 21:13:02,find a route: flag=04000000 gw-192.168.5.158 via VLAN5
+2026/11/18 21:13:02,"in-[Software-Switch], out-[VLAN5], skb_flags-02000000, vid-0, app_id: 0, url_cat_id: 0"
+2026/11/18 21:13:02,"gnum-100004, use int hash, slot=20, len=26"
+2026/11/18 21:13:02,"checked gnum-100004 policy-4294967295, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-122, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-124, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-281, ret-matched, act-accept"
+2026/11/18 21:13:02,ret-matched
+2026/11/18 21:13:02,"policy-281 is matched, act-accept"
+2026/11/18 21:13:02,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:02,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:02,"in-[Software-Switch], out-[VLAN5], skb_flags-02000000, vid-0"
+2026/11/18 21:13:02,"gnum-100015, check-ffffffffa002e2c0"
+2026/11/18 21:13:02,"checked gnum-100015 policy-1, ret-no-match, act-accept"
+2026/11/18 21:13:02,"gnum-100015 check result: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:02,"after check: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:02,Allowed by Policy-281:
+
+116
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.200.82:10753->10.0.47.39:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10753, seq=1365."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b48, original direction"
+2026/11/18 21:13:02,enter fast path
+
+117
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.200.82:10756->10.0.47.42:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10756, seq=1360."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b47, original direction"
+2026/11/18 21:13:02,enter fast path
+
+118
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.210.36:10764->10.0.200.82:0) tun_id=0.0.0.0 from VLAN20. type=0, code=0, id=10764, seq=1365."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b49, reply direction"
+2026/11/18 21:13:02,enter fast path
+2026/11/18 21:13:02,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+119
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.47.39:10753->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10753, seq=1365."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b48, reply direction"
+2026/11/18 21:13:02,enter fast path
+2026/11/18 21:13:02,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+120
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.47.42:10756->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10756, seq=1360."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b47, reply direction"
+2026/11/18 21:13:02,enter fast path
+2026/11/18 21:13:02,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+121
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 192.168.5.158:9799->10.0.200.82:0) tun_id=0.0.0.0 from VLAN5. type=0, code=0, id=9799, seq=11146."
+2026/11/18 21:13:02,"Find an existing session, id-8c70db53, reply direction"
+2026/11/18 21:13:02,find a route: flag=04000000 gw-10.0.200.82 via Software-Switch
+2026/11/18 21:13:02,ses->npu_state=0x100 skb->npu_flag=0x0
+2026/11/18 21:13:02,ses->npu_state=0x40108 skb->npu_flag=0x0
+2026/11/18 21:13:02,"Trying to offloading session from VLAN5 to Software-Switch, skb.npu_flag=00000000 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:02,"state=00000204, state2=00000001, npu_state=00040108"
+2026/11/18 21:13:02,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+122
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.47.26:10731->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10731, seq=1365."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b44, reply direction"
+2026/11/18 21:13:02,enter fast path
+2026/11/18 21:13:02,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+123
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.200.82:11251->10.0.47.194:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=11251, seq=11146."
+2026/11/18 21:13:02,allocate a new session-8c70db54
+2026/11/18 21:13:02,"in-[Software-Switch], out-[]"
+2026/11/18 21:13:02,len=0
+2026/11/18 21:13:02,"result: skb_flags-02000000, vid-0, ret-no-match, act-accept, flag-00000000"
+2026/11/18 21:13:02,find a route: flag=04000000 gw-10.0.47.194 via VLAN50
+2026/11/18 21:13:02,"in-[Software-Switch], out-[VLAN50], skb_flags-02000000, vid-0, app_id: 0, url_cat_id: 0"
+2026/11/18 21:13:02,"gnum-100004, use int hash, slot=22, len=25"
+2026/11/18 21:13:02,"checked gnum-100004 policy-4294967295, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-131, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-113, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-202, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-146, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-122, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-124, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-281, ret-matched, act-accept"
+2026/11/18 21:13:02,ret-matched
+2026/11/18 21:13:02,"policy-281 is matched, act-accept"
+2026/11/18 21:13:02,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:02,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:02,"in-[Software-Switch], out-[VLAN50], skb_flags-02000000, vid-0"
+2026/11/18 21:13:02,"gnum-100015, check-ffffffffa002e2c0"
+2026/11/18 21:13:02,"checked gnum-100015 policy-1, ret-no-match, act-accept"
+2026/11/18 21:13:02,"gnum-100015 check result: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:02,"after check: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:02,Allowed by Policy-281:
+
+124
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.47.194:11251->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=11251, seq=11146."
+2026/11/18 21:13:02,"Find an existing session, id-8c70db54, reply direction"
+2026/11/18 21:13:02,find a route: flag=04000000 gw-10.0.200.82 via Software-Switch
+2026/11/18 21:13:02,ses->npu_state=0x100 skb->npu_flag=0x0
+2026/11/18 21:13:02,ses->npu_state=0x40108 skb->npu_flag=0x0
+2026/11/18 21:13:02,"Trying to offloading session from VLAN50 to Software-Switch, skb.npu_flag=00000000 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:02,"state=00000204, state2=00000001, npu_state=00040108"
+2026/11/18 21:13:02,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+125
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.200.82:7471->192.168.5.108:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=7471, seq=11146."
+2026/11/18 21:13:02,allocate a new session-8c70db55
+2026/11/18 21:13:02,"in-[Software-Switch], out-[]"
+2026/11/18 21:13:02,len=0
+2026/11/18 21:13:02,"result: skb_flags-02000000, vid-0, ret-no-match, act-accept, flag-00000000"
+2026/11/18 21:13:02,find a route: flag=04000000 gw-192.168.5.108 via VLAN5
+2026/11/18 21:13:02,"in-[Software-Switch], out-[VLAN5], skb_flags-02000000, vid-0, app_id: 0, url_cat_id: 0"
+2026/11/18 21:13:02,"gnum-100004, use int hash, slot=20, len=26"
+2026/11/18 21:13:02,"checked gnum-100004 policy-4294967295, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-122, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-124, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-281, ret-matched, act-accept"
+2026/11/18 21:13:02,ret-matched
+2026/11/18 21:13:02,"policy-281 is matched, act-accept"
+2026/11/18 21:13:02,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:02,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-281"
+2026/11/18 21:13:02,"in-[Software-Switch], out-[VLAN5], skb_flags-02000000, vid-0"
+2026/11/18 21:13:02,"gnum-100015, check-ffffffffa002e2c0"
+2026/11/18 21:13:02,"checked gnum-100015 policy-1, ret-no-match, act-accept"
+2026/11/18 21:13:02,"gnum-100015 check result: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:02,"after check: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:02,Allowed by Policy-281:
+
+126
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=17, 10.0.200.82:62984->192.168.6.1:161) tun_id=0.0.0.0 from Software-Switch. "
+2026/11/18 21:13:02,allocate a new session-8c70db56
+2026/11/18 21:13:02,"in-[Software-Switch], out-[]"
+2026/11/18 21:13:02,len=0
+2026/11/18 21:13:02,"result: skb_flags-02000000, vid-0, ret-no-match, act-accept, flag-00000000"
+2026/11/18 21:13:02,Match policy routing id=2134114313: to 192.168.6.1 via ifindex-108
+2026/11/18 21:13:02,find a route: flag=04000000 gw-203.0.113.1 via VPN-SiteB
+2026/11/18 21:13:02,"in-[Software-Switch], out-[VPN-SiteB], skb_flags-02000000, vid-0, app_id: 0, url_cat_id: 0"
+2026/11/18 21:13:02,"gnum-100004, use int hash, slot=68, len=20"
+2026/11/18 21:13:02,"checked gnum-100004 policy-4294967295, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-282, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-121, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-122, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-124, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-281, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-208, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-186, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-235, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-237, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-238, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-165, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-111, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-254, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-255, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-92, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-135, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-196, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-290, ret-matched, act-accept"
+2026/11/18 21:13:02,ret-matched
+2026/11/18 21:13:02,"policy-290 is matched, act-accept"
+2026/11/18 21:13:02,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-290"
+2026/11/18 21:13:02,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-290"
+2026/11/18 21:13:02,"in-[Software-Switch], out-[VPN-SiteB], skb_flags-02000000, vid-0"
+2026/11/18 21:13:02,"gnum-100015, check-ffffffffa002e2c0"
+2026/11/18 21:13:02,"checked gnum-100015 policy-1, ret-no-match, act-accept"
+2026/11/18 21:13:02,"gnum-100015 check result: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:02,"after check: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:02,"gnum-100016, check-ffffffffa002f6d0"
+2026/11/18 21:13:02,"after check: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:02,Allowed by Policy-290:
+2026/11/18 21:13:02,"enter IPSec interface VPN-SiteB, tun_id=0.0.0.0"
+2026/11/18 21:13:02,"output to IPSec tunnel VPN-SiteB, tun_id=203.0.113.1, vrf 0"
+2026/11/18 21:13:02,IPsec encrypt/auth
+2026/11/18 21:13:02,send to 203.0.113.2 via intf-VLAN3030
+
+127
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 192.168.5.108:7471->10.0.200.82:0) tun_id=0.0.0.0 from VLAN5. type=0, code=0, id=7471, seq=11146."
+2026/11/18 21:13:02,"Find an existing session, id-8c70db55, reply direction"
+2026/11/18 21:13:02,find a route: flag=04000000 gw-10.0.200.82 via Software-Switch
+2026/11/18 21:13:02,ses->npu_state=0x100 skb->npu_flag=0x0
+2026/11/18 21:13:02,ses->npu_state=0x40108 skb->npu_flag=0x0
+2026/11/18 21:13:02,"Trying to offloading session from VLAN5 to Software-Switch, skb.npu_flag=00000000 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:02,"state=00000204, state2=00000001, npu_state=00040108"
+2026/11/18 21:13:02,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+128
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=6, 10.0.200.82:51454->10.0.47.178:49751) tun_id=0.0.0.0 from Software-Switch. flag [.], seq 559676510, ack 1283465767, win 255"
+2026/11/18 21:13:02,"Find an existing session, id-8c70d427, original direction"
+2026/11/18 21:13:02,enter fast path
+
+129
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=17, 192.168.6.1:161->10.0.200.82:62984) tun_id=203.0.113.1 from VPN-SiteB. "
+2026/11/18 21:13:02,"Find an existing session, id-8c70db56, reply direction"
+2026/11/18 21:13:02,src ip 192.168.6.1 match selector range 0.0.0.0-255.255.255.255
+2026/11/18 21:13:02,find a route: flag=00000000 gw-10.0.200.82 via Software-Switch
+2026/11/18 21:13:02,ses->npu_state=0x100 skb->npu_flag=0x0
+2026/11/18 21:13:02,ses->npu_state=0x40108 skb->npu_flag=0x0
+2026/11/18 21:13:02,"Trying to offloading session from VPN-SiteB to Software-Switch, skb.npu_flag=00000000 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:02,"state=00000204, state2=00000001, npu_state=00040108"
+2026/11/18 21:13:02,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+130
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=6, 10.0.47.178:49751->10.0.200.82:51454) tun_id=0.0.0.0 from VLAN50. flag [.], seq 1283465767, ack 559676846, win 252"
+2026/11/18 21:13:02,"Find an existing session, id-8c70d427, reply direction"
+2026/11/18 21:13:02,enter fast path
+2026/11/18 21:13:02,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+131
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=17, 10.0.200.82:62985->192.168.6.1:161) tun_id=0.0.0.0 from Software-Switch. "
+2026/11/18 21:13:02,allocate a new session-8c70db57
+2026/11/18 21:13:02,"in-[Software-Switch], out-[]"
+2026/11/18 21:13:02,len=0
+2026/11/18 21:13:02,"result: skb_flags-02000000, vid-0, ret-no-match, act-accept, flag-00000000"
+2026/11/18 21:13:02,Match policy routing id=2134114313: to 192.168.6.1 via ifindex-108
+2026/11/18 21:13:02,find a route: flag=04000000 gw-203.0.113.1 via VPN-SiteB
+2026/11/18 21:13:02,"in-[Software-Switch], out-[VPN-SiteB], skb_flags-02000000, vid-0, app_id: 0, url_cat_id: 0"
+2026/11/18 21:13:02,"gnum-100004, use int hash, slot=68, len=20"
+2026/11/18 21:13:02,"checked gnum-100004 policy-4294967295, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-282, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-121, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-122, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-124, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-281, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-208, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-186, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-235, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-237, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-238, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-165, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-111, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-254, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-255, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-92, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-135, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-196, ret-no-match, act-accept"
+2026/11/18 21:13:02,"checked gnum-100004 policy-290, ret-matched, act-accept"
+2026/11/18 21:13:02,ret-matched
+2026/11/18 21:13:02,"policy-290 is matched, act-accept"
+2026/11/18 21:13:02,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-290"
+2026/11/18 21:13:02,"after iprope_captive_check(): is_captive-0, ret-matched, act-accept, idx-290"
+2026/11/18 21:13:02,"in-[Software-Switch], out-[VPN-SiteB], skb_flags-02000000, vid-0"
+2026/11/18 21:13:02,"gnum-100015, check-ffffffffa002e2c0"
+2026/11/18 21:13:02,"checked gnum-100015 policy-1, ret-no-match, act-accept"
+2026/11/18 21:13:02,"gnum-100015 check result: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:02,"after check: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:02,"gnum-100016, check-ffffffffa002f6d0"
+2026/11/18 21:13:02,"after check: ret-no-match, act-accept, flag-00000000, flag2-00000000"
+2026/11/18 21:13:02,Allowed by Policy-290:
+2026/11/18 21:13:02,"enter IPSec interface VPN-SiteB, tun_id=0.0.0.0"
+2026/11/18 21:13:02,"output to IPSec tunnel VPN-SiteB, tun_id=203.0.113.1, vrf 0"
+2026/11/18 21:13:02,IPsec encrypt/auth
+2026/11/18 21:13:02,send to 203.0.113.2 via intf-VLAN3030
+
+132
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.200.82:10731->10.0.47.26:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10731, seq=1366."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b44, original direction"
+2026/11/18 21:13:02,enter fast path
+
+133
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=17, 192.168.6.1:161->10.0.200.82:62985) tun_id=203.0.113.1 from VPN-SiteB. "
+2026/11/18 21:13:02,"Find an existing session, id-8c70db57, reply direction"
+2026/11/18 21:13:02,src ip 192.168.6.1 match selector range 0.0.0.0-255.255.255.255
+2026/11/18 21:13:02,find a route: flag=00000000 gw-10.0.200.82 via Software-Switch
+2026/11/18 21:13:02,ses->npu_state=0x100 skb->npu_flag=0x0
+2026/11/18 21:13:02,ses->npu_state=0x40108 skb->npu_flag=0x0
+2026/11/18 21:13:02,"Trying to offloading session from VPN-SiteB to Software-Switch, skb.npu_flag=00000000 ses.state=00000204 ses.npu_state=0x00040108"
+2026/11/18 21:13:02,"state=00000204, state2=00000001, npu_state=00040108"
+2026/11/18 21:13:02,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+134
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.200.82:10756->10.0.47.42:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10756, seq=1361."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b47, original direction"
+2026/11/18 21:13:02,enter fast path
+
+135
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.200.82:10764->10.0.210.36:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10764, seq=1366."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b49, original direction"
+2026/11/18 21:13:02,enter fast path
+
+136
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.200.82:10753->10.0.47.39:2048) tun_id=0.0.0.0 from Software-Switch. type=8, code=0, id=10753, seq=1366."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b48, original direction"
+2026/11/18 21:13:02,enter fast path
+
+137
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.210.36:10764->10.0.200.82:0) tun_id=0.0.0.0 from VLAN20. type=0, code=0, id=10764, seq=1366."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b49, reply direction"
+2026/11/18 21:13:02,enter fast path
+2026/11/18 21:13:02,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+138
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.47.42:10756->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10756, seq=1361."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b47, reply direction"
+2026/11/18 21:13:02,enter fast path
+2026/11/18 21:13:02,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+139
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.47.26:10731->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10731, seq=1366."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b44, reply direction"
+2026/11/18 21:13:02,enter fast path
+2026/11/18 21:13:02,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"
+
+140
+2026/11/18 21:13:02,"vd-root:0 received a packet(proto=1, 10.0.47.39:10753->10.0.200.82:0) tun_id=0.0.0.0 from VLAN50. type=0, code=0, id=10753, seq=1366."
+2026/11/18 21:13:02,"Find an existing session, id-8c709b48, reply direction"
+2026/11/18 21:13:02,enter fast path
+2026/11/18 21:13:02,"send out via dev-VLAN2010, dst-mac-00:00:5e:00:53:01"

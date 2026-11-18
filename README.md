@@ -13,5 +13,6 @@ Small, single-purpose Windows utilities. Each app lives in its own folder and is
 | [snmp-live-graph](snmp-live-graph) | Live per-interface bandwidth graphs over SNMP v2c/v3, no server needed |
 | [radius-tester](radius-tester) | RADIUS client for testing servers and NAS setups: PAP/CHAP/MS-CHAPv2, MFA challenge, accounting, RadSec |
 | [host-top](host-top) | Live "who is using the bandwidth" view: throughput per remote host, process and connection via ETW (needs admin) |
+| [forti-flow](forti-flow) | Paste FortiGate `diagnose debug flow` output, get a step-by-step explanation per packet with verdicts, plus a debug command generator |
 
 Downloads are on the [Releases](../../releases) page. Building needs the .NET 10 SDK; see each app's README.
