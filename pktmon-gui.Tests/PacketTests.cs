@@ -96,3 +96,35 @@ public class PacketTests
         Assert.StartsWith("no,time,direction", lines[0]); Assert.Contains("\"172.19.186.198\"", lines[1]);
     }
 }
+
+public class HumanizeTests
+{
+    [Theory]
+    [InlineData("Flags [S], seq 1, win 64240, length 0", PacketCategory.TcpSyn, "Opening a connection to https (443)")]
+    [InlineData("Flags [S.], seq 1, ack 2, win 16, length 0", PacketCategory.TcpSyn, "Server accepts")]
+    [InlineData("Flags [.], ack 5, win 251, length 0", PacketCategory.TcpAck, "Acknowledgement")]
+    [InlineData("Flags [P.], seq 1:40, ack 5, win 16, length 39", PacketCategory.TcpData, "Sending 39 bytes")]
+    [InlineData("Flags [F.], seq 1, ack 5, win 16, length 0", PacketCategory.TcpFin, "Closing")]
+    [InlineData("Flags [R.], seq 1, ack 5, win 0, length 0", PacketCategory.TcpReset, "reset")]
+    public void TcpFlagsBecomeEnglish(string info, PacketCategory cat, string text)
+    {
+        var (c, s) = Humanize.Describe("TCP", "10.0.0.5:50000", "10.0.0.9:443", info, false, "");
+        Assert.Equal(cat, c); Assert.Contains(text, s);
+    }
+
+    [Fact]
+    public void DnsQueryAndAnswer()
+    {
+        Assert.Contains("what is web.whatsapp.com", Humanize.Describe("DNS", "a:1", "b:53", "50807+ A? web.whatsapp.com. (34)", false, "").Item2);
+        Assert.Contains("does not exist", Humanize.Describe("DNS", "b:53", "a:1", "53282 NXDomain 0/1/0 (109)", false, "").Item2);
+    }
+
+    [Fact]
+    public void DropsAndPortNames()
+    {
+        Assert.Equal((PacketCategory.Drop, "Dropped: Unsupported EtherType"), Humanize.Describe("", "", "", "", true, "Unsupported EtherType"));
+        Assert.Equal("1.2.3.4:443 (https)", Humanize.Endpoint("1.2.3.4:443"));
+        Assert.Equal("1.2.3.4:50000", Humanize.Endpoint("1.2.3.4:50000"));
+        Assert.Equal("fe80::1:546", Humanize.Endpoint("fe80::1:546"));
+    }
+}

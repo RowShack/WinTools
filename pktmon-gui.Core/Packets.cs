@@ -18,6 +18,9 @@ public sealed class PacketRow
     public string Protocol { get; init; } = "";
     public string Info { get; init; } = "";
     public bool IsDrop { get; init; }
+    /// <summary>Plain-English one-liner, e.g. "Starting a connection to https (443)".</summary>
+    public string Summary { get; init; } = "";
+    public PacketCategory Category { get; init; }
     public string DropReason { get; init; } = "";
     /// <summary>The unmodified text of this event, for the detail pane and "copy".</summary>
     public string Raw { get; init; } = "";
@@ -37,6 +40,8 @@ public sealed class PacketRow
         return true;
     }
 }
+
+public enum PacketCategory { Other, Drop, TcpSyn, TcpData, TcpAck, TcpFin, TcpReset, Udp, Dns, Arp, Icmp }
 
 /// <summary>Turns <c>pktmon etl2txt</c> text into <see cref="PacketRow"/>s. Defensive: lines it does not understand are skipped, never fatal.</summary>
 public static class PacketParser
@@ -114,12 +119,13 @@ public static class PacketParser
             if (colon >= 0) { int c = d.IndexOf(':', colon); if (c >= 0) info = d[(c + 1)..].Trim(); }
         }
         if (drop && string.IsNullOrWhiteSpace(info)) info = "dropped";
+        var (cat, summary) = Humanize.Describe(proto, src, dst, info.Trim(), drop, m.Groups["reason"].Success ? m.Groups["reason"].Value : "");
 
         return new PacketRow
         {
             Index = index, Time = m.Groups["ts"].Value, Direction = m.Groups["dir"].Value, Type = m.Groups["type"].Value,
             Component = int.Parse(m.Groups["comp"].Value, CultureInfo.InvariantCulture), Size = int.Parse(m.Groups["size"].Value, CultureInfo.InvariantCulture),
-            Source = src, Destination = dst, Protocol = proto, Info = info.Trim(), IsDrop = drop,
+            Source = src, Destination = dst, Protocol = proto, Info = info.Trim(), IsDrop = drop, Summary = summary, Category = cat,
             DropReason = m.Groups["reason"].Success ? m.Groups["reason"].Value : "",
             Raw = header + (detail.Count > 0 ? Environment.NewLine + string.Join(Environment.NewLine, detail) : ""),
         };
@@ -138,7 +144,86 @@ public static class PacketParser
         foreach (var r in rows)
             sb.Append(r.Index.ToString(CultureInfo.InvariantCulture)).Append(',').Append(Q(r.Time)).Append(',').Append(r.Direction).Append(',').Append(Q(r.Type)).Append(',')
               .Append(r.Component.ToString(CultureInfo.InvariantCulture)).Append(',').Append(r.Size.ToString(CultureInfo.InvariantCulture)).Append(',')
-              .Append(Q(r.Source)).Append(',').Append(Q(r.Destination)).Append(',').Append(r.Protocol).Append(',').Append(Q(r.DropReason)).Append(',').Append(Q(r.Info)).Append("\r\n");
+              .Append(Q(r.Source)).Append(',').Append(Q(r.Destination)).Append(',').Append(r.Protocol).Append(',').Append(Q(r.DropReason)).Append(',').Append(Q(r.Summary)).Append(',').Append(Q(r.Info)).Append("\r\n");
         return sb.ToString();
+    }
+}
+
+/// <summary>Plain-English descriptions and well-known port names.</summary>
+public static class Humanize
+{
+    private static readonly Dictionary<int, string> Ports = new()
+    {
+        [20] = "ftp-data", [21] = "ftp", [22] = "ssh", [23] = "telnet", [25] = "smtp", [53] = "dns", [67] = "dhcp-server", [68] = "dhcp-client", [80] = "http", [88] = "kerberos",
+        [110] = "pop3", [123] = "ntp", [135] = "rpc", [137] = "netbios-ns", [138] = "netbios-dgm", [139] = "netbios", [143] = "imap", [161] = "snmp", [162] = "snmp-trap",
+        [389] = "ldap", [443] = "https", [445] = "smb", [465] = "smtps", [500] = "ike", [514] = "syslog", [546] = "dhcpv6-client", [547] = "dhcpv6-server", [587] = "smtp-submission",
+        [636] = "ldaps", [853] = "dns-over-tls", [993] = "imaps", [995] = "pop3s", [1812] = "radius", [1813] = "radius-acct", [3389] = "rdp", [4500] = "ipsec-nat-t",
+        [5353] = "mdns", [5355] = "llmnr", [8080] = "http-alt", [8443] = "https-alt",
+    };
+
+    private static readonly System.Text.RegularExpressions.Regex V4Endpoint = new(@"^(\d{1,3}(?:\.\d{1,3}){3}):(\d+)$", System.Text.RegularExpressions.RegexOptions.Compiled);
+    private static readonly System.Text.RegularExpressions.Regex Flags = new(@"Flags \[(?<f>[^\]]*)\]", System.Text.RegularExpressions.RegexOptions.Compiled);
+    private static readonly System.Text.RegularExpressions.Regex Len = new(@"length (?<n>\d+)\s*$", System.Text.RegularExpressions.RegexOptions.Compiled);
+    private static readonly System.Text.RegularExpressions.Regex DnsQuery = new(@"^\d+\+?\s+(?<t>[A-Za-z0-9]+\?)\s+(?<n>\S+)", System.Text.RegularExpressions.RegexOptions.Compiled);
+    private static readonly System.Text.RegularExpressions.Regex DnsAnswer = new(@"^\d+\s+(?<r>[^\s(]+)\s+(?<c>\d+/\d+/\d+)", System.Text.RegularExpressions.RegexOptions.Compiled);
+
+    private static readonly System.Text.RegularExpressions.Regex DnsOk = new(@"^\d+\s+(?<n>\d+)/\d+/\d+\s*(?<rest>.*)", System.Text.RegularExpressions.RegexOptions.Compiled);
+
+    public static string? PortName(int port) => Ports.TryGetValue(port, out var n) ? n : null;
+
+    /// <summary>"160.79.104.10:443" becomes "160.79.104.10:443 (https)" when the port is well known.</summary>
+    public static string Endpoint(string ep)
+    {
+        var m = V4Endpoint.Match(ep);
+        return m.Success && PortName(int.Parse(m.Groups[2].Value)) is { } n ? $"{ep} ({n})" : ep;
+    }
+
+    private static string Svc(string ep)
+    {
+        var m = V4Endpoint.Match(ep);
+        if (!m.Success) return ep;
+        int p = int.Parse(m.Groups[2].Value);
+        return PortName(p) is { } n ? $"{n} ({p})" : $"port {p}";
+    }
+
+    public static (PacketCategory, string) Describe(string proto, string src, string dst, string info, bool drop, string reason)
+    {
+        if (drop) return (PacketCategory.Drop, "Dropped" + (reason.Length > 0 ? ": " + reason : ""));
+        switch (proto)
+        {
+            case "TCP":
+            {
+                var f = Flags.Match(info).Groups["f"].Value;
+                int len = Len.Match(info) is { Success: true } lm ? int.Parse(lm.Groups["n"].Value) : 0;
+                bool syn = f.Contains('S'), ack = f.Contains('.'), fin = f.Contains('F'), rst = f.Contains('R'), psh = f.Contains('P');
+                if (rst) return (PacketCategory.TcpReset, $"Connection reset (refused or aborted) {src} → {Svc(dst)}");
+                if (syn && !ack) return (PacketCategory.TcpSyn, $"Opening a connection to {Svc(dst)}");
+                if (syn) return (PacketCategory.TcpSyn, $"Server accepts the connection ({Svc(src)})");
+                if (fin) return (PacketCategory.TcpFin, "Closing the connection");
+                if (len > 0) return (PacketCategory.TcpData, $"Sending {len} byte{(len == 1 ? "" : "s")} of data" + (psh ? "" : " (part of a larger send)"));
+                return (PacketCategory.TcpAck, "Acknowledgement (no data)");
+            }
+            case "DNS":
+            {
+                var q = DnsQuery.Match(info);
+                if (q.Success) return (PacketCategory.Dns, $"Asking DNS: what is {q.Groups["n"].Value.TrimEnd('.')} ({q.Groups["t"].Value.TrimEnd('?')} record)?");
+                var a = DnsAnswer.Match(info);
+                if (a.Success)
+                {
+                    string r = a.Groups["r"].Value;
+                    return (PacketCategory.Dns, r switch { "NXDomain" => "DNS answer: that name does not exist", "ServFail" => "DNS answer: the DNS server failed", "Refused" => "DNS answer: refused", _ => "DNS answer: " + r });
+                }
+                var ok = DnsOk.Match(info);
+                if (ok.Success) return (PacketCategory.Dns, ok.Groups["n"].Value == "0" ? "DNS answer: no records for that name" : $"DNS answer: {ok.Groups["n"].Value} record(s) — {ok.Groups["rest"].Value.Trim()}");
+                return (PacketCategory.Dns, "DNS " + info);
+            }
+            case "UDP": return (PacketCategory.Udp, $"UDP datagram to {Svc(dst)}");
+            case "ARP":
+                return (PacketCategory.Arp, info.StartsWith("Request", StringComparison.Ordinal) ? $"Who has {dst}? Tell {src}" : $"{src} is at the address shown");
+            case "ICMP": case "ICMPv6":
+                return (PacketCategory.Icmp, info.Contains("echo request", StringComparison.OrdinalIgnoreCase) ? "Ping request" : info.Contains("echo reply", StringComparison.OrdinalIgnoreCase) ? "Ping reply"
+                    : info.Contains("unreachable", StringComparison.OrdinalIgnoreCase) ? "Destination unreachable" : "ICMP message");
+            default: return (PacketCategory.Other, "");
+        }
     }
 }

@@ -11,6 +11,7 @@ public sealed class PacketsPage : TabPage
     private readonly TextBox _filter = new() { Width = 260, PlaceholderText = "filter: ip, port, protocol, text… (\"drop\" = drops only)" };
     private readonly ComboBox _dir = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 80 };
     private readonly ComboBox _comp = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 90 };
+    private readonly CheckBox _hideAck = new() { Text = "Hide plain ACKs", AutoSize = true, Margin = new Padding(12, 6, 0, 0) };
     private readonly Label _count = new() { AutoSize = true, Margin = new Padding(12, 8, 0, 0), ForeColor = SystemColors.GrayText };
     private readonly DataGridView _grid = new()
     {
@@ -37,19 +38,23 @@ public sealed class PacketsPage : TabPage
         var copy = new Button { Text = "Copy rows", AutoSize = true };
         top.Controls.AddRange([_openLast, _open, _cancel, new Label { Text = "Filter", AutoSize = true, Margin = new Padding(16, 8, 4, 0) }, _filter,
             new Label { Text = "Dir", AutoSize = true, Margin = new Padding(8, 8, 4, 0) }, _dir,
-            new Label { Text = "Component", AutoSize = true, Margin = new Padding(8, 8, 4, 0) }, _comp, export, copy, _count]);
+            new Label { Text = "Component", AutoSize = true, Margin = new Padding(8, 8, 4, 0) }, _comp, _hideAck, export, copy, _count]);
+        var legend = new FlowLayoutPanel { Dock = DockStyle.Top, AutoSize = true, WrapContents = true, Padding = new Padding(0, 4, 0, 4) };
+        foreach (var (cat, text) in new[] { (PacketCategory.TcpSyn, "TCP connect"), (PacketCategory.TcpData, "TCP data"), (PacketCategory.TcpAck, "TCP ACK"), (PacketCategory.TcpFin, "TCP close"),
+                     (PacketCategory.TcpReset, "TCP reset"), (PacketCategory.Dns, "DNS"), (PacketCategory.Udp, "UDP"), (PacketCategory.Arp, "ARP"), (PacketCategory.Icmp, "ICMP / ping"), (PacketCategory.Drop, "Dropped") })
+            legend.Controls.Add(new Label { Text = text, AutoSize = true, Padding = new Padding(6, 2, 6, 2), Margin = new Padding(0, 0, 6, 0), BackColor = Back(cat), ForeColor = Fore(cat), BorderStyle = BorderStyle.FixedSingle });
 
-        foreach (var (name, head, w) in new[] { ("no", "#", 55), ("time", "Time", 130), ("dir", "Dir", 40), ("comp", "Comp", 50), ("size", "Size", 55),
-                     ("src", "Source", 190), ("dst", "Destination", 190), ("proto", "Protocol", 70), ("info", "Info", 600) })
+        foreach (var (name, head, w) in new[] { ("no", "#", 50), ("time", "Time", 100), ("dir", "Dir", 55), ("comp", "Comp", 45), ("size", "Bytes", 55),
+                     ("src", "From", 175), ("dst", "To", 215), ("proto", "Proto", 55), ("sum", "What it is", 330), ("info", "Technical details", 520) })
             _grid.Columns.Add(new DataGridViewTextBoxColumn { Name = name, HeaderText = head, Width = w, SortMode = DataGridViewColumnSortMode.NotSortable });
         _grid.Columns["size"]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
         var split = new SplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Horizontal, SplitterDistance = 420 };
         split.Panel1.Controls.Add(_grid);
-        var box = new GroupBox { Text = "Selected packet (raw pktmon text)", Dock = DockStyle.Fill, Padding = new Padding(6) };
+        var box = new GroupBox { Text = "Selected packet", Dock = DockStyle.Fill, Padding = new Padding(6) };
         box.Controls.Add(_detail);
         split.Panel2.Controls.Add(box);
-        Controls.Add(split); Controls.Add(top);
+        Controls.Add(split); Controls.Add(legend); Controls.Add(top);
 
         _grid.CellValueNeeded += (_, e) =>
         {
@@ -57,23 +62,31 @@ public sealed class PacketsPage : TabPage
             var r = _view[e.RowIndex];
             e.Value = _grid.Columns[e.ColumnIndex].Name switch
             {
-                "no" => r.Index, "time" => r.Time[11..], "dir" => r.Direction, "comp" => r.Component, "size" => r.Size,
-                "src" => r.Source, "dst" => r.Destination, "proto" => r.Protocol, _ => r.IsDrop ? $"DROP: {r.DropReason} {r.Info}".Trim() : r.Info,
+                "no" => r.Index, "time" => r.Time.Length > 11 ? r.Time[11..^6] : r.Time, "dir" => r.Direction == "Tx" ? "▲ Tx" : r.Direction == "Rx" ? "▼ Rx" : r.Direction,
+                "comp" => r.Component, "size" => r.Size, "src" => Humanize.Endpoint(r.Source), "dst" => Humanize.Endpoint(r.Destination), "proto" => r.Protocol,
+                "sum" => r.Summary, _ => r.Info,
             };
         };
         _grid.CellFormatting += (_, e) =>
         {
-            if (e.RowIndex < 0 || e.RowIndex >= _view.Count || !_view[e.RowIndex].IsDrop) return;
-            e.CellStyle!.ForeColor = Color.Firebrick; e.CellStyle.BackColor = Color.MistyRose;
+            if (e.RowIndex < 0 || e.RowIndex >= _view.Count) return;
+            var r = _view[e.RowIndex];
+            e.CellStyle!.BackColor = Back(r.Category); e.CellStyle.ForeColor = Fore(r.Category);
+            e.CellStyle.SelectionBackColor = ControlPaint.Dark(Back(r.Category), 0.15f); e.CellStyle.SelectionForeColor = Color.White;
+            string col = _grid.Columns[e.ColumnIndex].Name;
+            if (col == "dir") e.CellStyle.ForeColor = r.Direction == "Tx" ? Color.DarkGreen : Color.DarkBlue;
+            if (col == "sum") e.CellStyle.Font = new Font(_grid.Font, FontStyle.Bold);
+            if (col == "info") e.CellStyle.ForeColor = Color.DimGray;
         };
         _grid.SelectionChanged += (_, _) =>
         {
             int i = _grid.CurrentRow?.Index ?? -1;
-            _detail.Text = i >= 0 && i < _view.Count ? _view[i].Raw : "";
+            _detail.Text = i >= 0 && i < _view.Count ? Describe(_view[i]) : "";
         };
         _filter.TextChanged += (_, _) => ApplyFilter();
         _dir.SelectedIndexChanged += (_, _) => ApplyFilter();
         _comp.SelectedIndexChanged += (_, _) => ApplyFilter();
+        _hideAck.CheckedChanged += (_, _) => ApplyFilter();
         _openLast.Click += async (_, _) => await LoadAsync(_lastEtl);
         _open.Click += async (_, _) =>
         {
@@ -121,10 +134,37 @@ public sealed class PacketsPage : TabPage
         string f = _filter.Text;
         string dir = _dir.SelectedItem as string ?? "All";
         string comp = _comp.SelectedItem as string ?? "All";
-        _view = _all.Where(p => (dir == "All" || p.Direction == dir) && (comp == "All" || p.Component.ToString() == comp) && p.Matches(f)).ToList();
+        _view = _all.Where(p => (dir == "All" || p.Direction == dir) && (comp == "All" || p.Component.ToString() == comp) && p.Matches(f) && !(_hideAck.Checked && p.Category == PacketCategory.TcpAck)).ToList();
         _grid.RowCount = 0; _grid.RowCount = _view.Count;
         int drops = _view.Count(p => p.IsDrop);
         _count.Text = $"{_view.Count} of {_all.Count} packet events" + (drops > 0 ? $" ({drops} drops)" : "");
+    }
+
+    // Soft row colours so the kind of traffic stands out at a glance; the legend above the grid uses the same ones.
+    private static Color Back(PacketCategory c) => c switch
+    {
+        PacketCategory.Drop => Color.FromArgb(255, 205, 205), PacketCategory.TcpReset => Color.FromArgb(255, 220, 190), PacketCategory.TcpSyn => Color.FromArgb(205, 240, 205),
+        PacketCategory.TcpData => Color.FromArgb(232, 245, 252), PacketCategory.TcpAck => Color.FromArgb(246, 246, 246), PacketCategory.TcpFin => Color.FromArgb(255, 240, 190),
+        PacketCategory.Dns => Color.FromArgb(205, 225, 255), PacketCategory.Udp => Color.FromArgb(232, 222, 250), PacketCategory.Arp => Color.FromArgb(255, 250, 200),
+        PacketCategory.Icmp => Color.FromArgb(205, 245, 240), _ => Color.White,
+    };
+
+    private static Color Fore(PacketCategory c) => c switch { PacketCategory.Drop => Color.DarkRed, PacketCategory.TcpReset => Color.Maroon, _ => Color.Black };
+
+    private static string Describe(PacketRow r)
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine(r.IsDrop ? "DROPPED PACKET" : $"{r.Protocol} packet".Trim());
+        if (r.Summary.Length > 0) sb.AppendLine(r.Summary);
+        sb.AppendLine();
+        sb.AppendLine($"When:       {r.Time}");
+        sb.AppendLine($"Direction:  {(r.Direction == "Tx" ? "Tx - sent by this PC" : r.Direction == "Rx" ? "Rx - received by this PC" : r.Direction)} (component {r.Component}, {r.Type})");
+        if (r.Source.Length > 0) sb.AppendLine($"From:       {Humanize.Endpoint(r.Source)}");
+        if (r.Destination.Length > 0) sb.AppendLine($"To:         {Humanize.Endpoint(r.Destination)}");
+        sb.AppendLine($"Size:       {r.Size} bytes");
+        if (r.IsDrop) sb.AppendLine($"Drop reason: {r.DropReason}");
+        sb.AppendLine().AppendLine("--- raw pktmon text ---").Append(r.Raw);
+        return sb.ToString();
     }
 
     private void Export()
