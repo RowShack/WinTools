@@ -67,7 +67,8 @@ public sealed class MainForm : Form
         right.Controls.Add(_tilePanel); right.Controls.Add(BuildLogPanel()); right.Controls.Add(bar);
 
         var statusBar = new StatusStrip(); statusBar.Items.Add(_status);
-        Controls.Add(right); Controls.Add(left); Controls.Add(statusBar);
+        var splitter = new Splitter { Dock = DockStyle.Left, Width = 6, MinSize = 220, MinExtra = 400, BackColor = SystemColors.ControlDark };
+        Controls.Add(right); Controls.Add(splitter); Controls.Add(left); Controls.Add(statusBar);
 
         _tilePanel.SizeChanged += (_, _) => FitTiles();
         _deviceList.SelectedIndexChanged += (_, _) => ShowInterfaces();

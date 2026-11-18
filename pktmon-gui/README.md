@@ -12,6 +12,7 @@ A front-end for Windows' built-in **Packet Monitor** (`pktmon.exe`) so you can t
 - Full packets (`--pkt-size 0`), drops-only/flow-only, circular or multi-file log with a size limit
 - Start / Stop, elapsed timer, live packet and drop counters
 - Stop converts to **pcapng** (`etl2pcap`) in a timestamped folder; optional text export (`etl2txt`); *Open folder*; *Open in Wireshark* if installed
+- **Packets tab**: opens a capture (.etl) inside the app — one row per packet event with time, direction, component, source/destination, protocol and decoded info; filter box (words match IPs, ports, protocol, text; `drop` shows drops only), direction and component filters, drops highlighted in red, raw text of the selected packet, copy and CSV export. Uses `pktmon etl2txt`, so it needs the same Windows pktmon but no Wireshark
 - **Drops tab**: groups dropped packets by drop reason and component
 - **Remote script**: generates a copy-paste PowerShell script (with `try/finally` cleanup) for servers where you can't run the GUI
 

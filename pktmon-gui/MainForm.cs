@@ -53,6 +53,7 @@ public sealed class MainForm : Form
     private readonly DataGridView _dropGroups = Grid();
     private readonly DataGridView _dropRows = Grid();
     private List<DropEntry> _drops = [];
+    private readonly PacketsPage _packets = new();
 
     private static DataGridView Grid() => new()
     {
@@ -69,7 +70,8 @@ public sealed class MainForm : Form
         Font = new Font("Segoe UI", 9.5f);
 
         var tabs = new TabControl { Dock = DockStyle.Fill };
-        tabs.TabPages.AddRange([BuildCaptureTab(), BuildDropsTab()]);
+        tabs.TabPages.AddRange([BuildCaptureTab(), _packets, BuildDropsTab()]);
+        _packets.StatusChanged += t => _status.Text = t;
         var bar = new StatusStrip(); bar.Items.Add(_status);
         Controls.Add(tabs); Controls.Add(bar);
 
@@ -363,6 +365,7 @@ public sealed class MainForm : Form
             if (_txt.Checked) await Exec(CommandBuilder.Etl2TxtArguments(_lastEtl!, Path.ChangeExtension(_lastEtl!, ".txt")), true);
             Log($"Done. Files are in {_lastDir}");
             _openFolder.Enabled = true; _openWireshark.Enabled = _lastPcap != null && FindWireshark() != null; _dropsLoad.Enabled = true;
+            _packets.SetLastCapture(_lastEtl!);
             _status.Text = "Capture saved";
         }
         finally
