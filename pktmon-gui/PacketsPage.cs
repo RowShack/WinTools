@@ -10,8 +10,9 @@ public sealed class PacketsPage : TabPage
     private readonly Button _cancel = new() { Text = "Cancel", AutoSize = true, Enabled = false };
     private readonly TextBox _filter = new() { Width = 260, PlaceholderText = "filter: ip, port, protocol, text… (\"drop\" = drops only)" };
     private readonly ComboBox _dir = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 80 };
-    private readonly ComboBox _comp = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 90 };
+    private readonly ComboBox _comp = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 260 };
     private readonly CheckBox _hideAck = new() { Text = "Hide plain ACKs", AutoSize = true, Margin = new Padding(12, 6, 0, 0) };
+    private readonly Label _nameNote = new() { Dock = DockStyle.Bottom, AutoSize = true, ForeColor = SystemColors.GrayText, Margin = new Padding(0, 4, 0, 0) };
     private readonly Label _count = new() { AutoSize = true, Margin = new Padding(12, 8, 0, 0), ForeColor = SystemColors.GrayText };
     private readonly DataGridView _grid = new()
     {
@@ -24,6 +25,11 @@ public sealed class PacketsPage : TabPage
     private List<PacketRow> _view = [];
     private CancellationTokenSource? _cts;
     private string? _lastEtl;
+    private Dictionary<int, CaptureComponent> _names = [];
+
+    /// <summary>Supplies this PC's current component list (used when a capture has no components.json).</summary>
+    [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    public Func<IReadOnlyList<CaptureComponent>>? LiveComponents { get; set; }
 
     public event Action<string>? StatusChanged;
 
@@ -31,7 +37,7 @@ public sealed class PacketsPage : TabPage
     {
         Padding = new Padding(8);
         _dir.Items.AddRange(["All", "Rx", "Tx"]); _dir.SelectedIndex = 0;
-        _comp.Items.Add("All"); _comp.SelectedIndex = 0;
+        _comp.Items.Add(new CompItem(null, "All")); _comp.SelectedIndex = 0;
 
         var top = new FlowLayoutPanel { Dock = DockStyle.Top, AutoSize = true, WrapContents = true };
         var export = new Button { Text = "Export CSV…", AutoSize = true };
@@ -44,7 +50,7 @@ public sealed class PacketsPage : TabPage
                      (PacketCategory.TcpReset, "TCP reset"), (PacketCategory.Dns, "DNS"), (PacketCategory.Udp, "UDP"), (PacketCategory.Arp, "ARP"), (PacketCategory.Icmp, "ICMP / ping"), (PacketCategory.Drop, "Dropped") })
             legend.Controls.Add(new Label { Text = text, AutoSize = true, Padding = new Padding(6, 2, 6, 2), Margin = new Padding(0, 0, 6, 0), BackColor = Back(cat), ForeColor = Fore(cat), BorderStyle = BorderStyle.FixedSingle });
 
-        foreach (var (name, head, w) in new[] { ("no", "#", 50), ("time", "Time", 100), ("dir", "Dir", 55), ("comp", "Comp", 45), ("size", "Bytes", 55),
+        foreach (var (name, head, w) in new[] { ("no", "#", 50), ("time", "Time", 100), ("dir", "Dir", 55), ("comp", "Component", 200), ("size", "Bytes", 55),
                      ("src", "From", 175), ("dst", "To", 215), ("proto", "Proto", 55), ("sum", "What it is", 330), ("info", "Technical details", 520) })
             _grid.Columns.Add(new DataGridViewTextBoxColumn { Name = name, HeaderText = head, Width = w, SortMode = DataGridViewColumnSortMode.NotSortable });
         _grid.Columns["size"]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
@@ -54,7 +60,7 @@ public sealed class PacketsPage : TabPage
         var box = new GroupBox { Text = "Selected packet", Dock = DockStyle.Fill, Padding = new Padding(6) };
         box.Controls.Add(_detail);
         split.Panel2.Controls.Add(box);
-        Controls.Add(split); Controls.Add(legend); Controls.Add(top);
+        Controls.Add(split); Controls.Add(_nameNote); Controls.Add(legend); Controls.Add(top);
 
         _grid.CellValueNeeded += (_, e) =>
         {
@@ -63,7 +69,7 @@ public sealed class PacketsPage : TabPage
             e.Value = _grid.Columns[e.ColumnIndex].Name switch
             {
                 "no" => r.Index, "time" => r.Time.Length > 11 ? r.Time[11..^6] : r.Time, "dir" => r.Direction == "Tx" ? "▲ Tx" : r.Direction == "Rx" ? "▼ Rx" : r.Direction,
-                "comp" => r.Component, "size" => r.Size, "src" => Humanize.Endpoint(r.Source), "dst" => Humanize.Endpoint(r.Destination), "proto" => r.Protocol,
+                "comp" => ComponentNames.Label(r.Component, _names), "size" => r.Size, "src" => Humanize.Endpoint(r.Source), "dst" => Humanize.Endpoint(r.Destination), "proto" => r.Protocol,
                 "sum" => r.Summary, _ => r.Info,
             };
         };
@@ -114,9 +120,18 @@ public sealed class PacketsPage : TabPage
             _count.Text = "Parsing…";
             string text = await File.ReadAllTextAsync(tmp, ct);   // etl2txt writes UTF-16 with a BOM; this detects it
             _all = await Task.Run(() => PacketParser.Parse(text), ct);
-            _comp.Items.Clear(); _comp.Items.Add("All");
-            foreach (var c in _all.Select(p => p.Component).Distinct().Order()) _comp.Items.Add(c.ToString());
+            _names = ComponentNames.Load(Path.GetDirectoryName(etl));
+            string nameNote = "Component names: saved with this capture.";
+            if (_names.Count == 0 && LiveComponents?.Invoke() is { Count: > 0 } live)
+            {
+                _names = live.GroupBy(c => c.Id).ToDictionary(g => g.Key, g => g.First());
+                nameNote = "Component names: taken from this PC right now (this capture has none saved, so they may not match).";
+            }
+            else if (_names.Count == 0) nameNote = "Component names: not available for this capture.";
+            _comp.Items.Clear(); _comp.Items.Add(new CompItem(null, "All"));
+            foreach (var c in _all.Select(p => p.Component).Distinct().Order()) _comp.Items.Add(new CompItem(c, ComponentNames.Label(c, _names)));
             _comp.SelectedIndex = 0;
+            _nameNote.Text = nameNote;
             ApplyFilter();
             StatusChanged?.Invoke($"{_all.Count} packet events in {Path.GetFileName(etl)}");
             if (_all.Count == 0) MessageBox.Show(FindForm(), "No packet events were found. Was the capture empty, or does this pktmon build format lines differently? Try the \"Also write a text version\" option and look at the .txt.", "Packets");
@@ -133,8 +148,8 @@ public sealed class PacketsPage : TabPage
     {
         string f = _filter.Text;
         string dir = _dir.SelectedItem as string ?? "All";
-        string comp = _comp.SelectedItem as string ?? "All";
-        _view = _all.Where(p => (dir == "All" || p.Direction == dir) && (comp == "All" || p.Component.ToString() == comp) && p.Matches(f) && !(_hideAck.Checked && p.Category == PacketCategory.TcpAck)).ToList();
+        int? comp = (_comp.SelectedItem as CompItem)?.Id;
+        _view = _all.Where(p => (dir == "All" || p.Direction == dir) && (comp == null || p.Component == comp) && p.Matches(f) && !(_hideAck.Checked && p.Category == PacketCategory.TcpAck)).ToList();
         _grid.RowCount = 0; _grid.RowCount = _view.Count;
         int drops = _view.Count(p => p.IsDrop);
         _count.Text = $"{_view.Count} of {_all.Count} packet events" + (drops > 0 ? $" ({drops} drops)" : "");
@@ -151,14 +166,14 @@ public sealed class PacketsPage : TabPage
 
     private static Color Fore(PacketCategory c) => c switch { PacketCategory.Drop => Color.DarkRed, PacketCategory.TcpReset => Color.Maroon, _ => Color.Black };
 
-    private static string Describe(PacketRow r)
+    private string Describe(PacketRow r)
     {
         var sb = new System.Text.StringBuilder();
         sb.AppendLine(r.IsDrop ? "DROPPED PACKET" : $"{r.Protocol} packet".Trim());
         if (r.Summary.Length > 0) sb.AppendLine(r.Summary);
         sb.AppendLine();
         sb.AppendLine($"When:       {r.Time}");
-        sb.AppendLine($"Direction:  {(r.Direction == "Tx" ? "Tx - sent by this PC" : r.Direction == "Rx" ? "Rx - received by this PC" : r.Direction)} (component {r.Component}, {r.Type})");
+        sb.AppendLine($"Direction:  {(r.Direction == "Tx" ? "Tx - sent by this PC" : r.Direction == "Rx" ? "Rx - received by this PC" : r.Direction)} (component {ComponentNames.Label(r.Component, _names)}, {r.Type})");
         if (r.Source.Length > 0) sb.AppendLine($"From:       {Humanize.Endpoint(r.Source)}");
         if (r.Destination.Length > 0) sb.AppendLine($"To:         {Humanize.Endpoint(r.Destination)}");
         sb.AppendLine($"Size:       {r.Size} bytes");
@@ -184,3 +199,6 @@ public sealed class PacketsPage : TabPage
         StatusChanged?.Invoke("Rows copied");
     }
 }
+
+/// <summary>Dropdown entry: a component id (null = all) with its display text.</summary>
+internal sealed record CompItem(int? Id, string Text) { public override string ToString() => Text; }

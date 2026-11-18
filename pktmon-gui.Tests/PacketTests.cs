@@ -128,3 +128,41 @@ public class HumanizeTests
         Assert.Equal("fe80::1:546", Humanize.Endpoint("fe80::1:546"));
     }
 }
+
+public class ComponentNameTests
+{
+    private static string TempDir() { string d = Path.Combine(Path.GetTempPath(), "pkn-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(d); return d; }
+
+    [Fact]
+    public void SaveLoadRoundTrip_AndLabels()
+    {
+        string dir = TempDir();
+        try
+        {
+            ComponentNames.Save(dir, [new CaptureComponent(18, "Intel Wi-Fi 6 AX201", "Adapter", null, null), new CaptureComponent(2, "TCP/IP", "Protocol", null, null)]);
+            var m = ComponentNames.Load(dir);
+            Assert.Equal(2, m.Count);
+            Assert.Equal("18 · Intel Wi-Fi 6 AX201", ComponentNames.Label(18, m));
+            Assert.Equal("99", ComponentNames.Label(99, m));
+        }
+        finally { Directory.Delete(dir, true); }
+    }
+
+    [Fact]
+    public void MissingOrBrokenFile_GivesEmptyMap()
+    {
+        Assert.Empty(ComponentNames.Load(null));
+        Assert.Empty(ComponentNames.Load(Path.Combine(Path.GetTempPath(), "does-not-exist-" + Guid.NewGuid().ToString("N"))));
+        string dir = TempDir();
+        try { File.WriteAllText(Path.Combine(dir, ComponentNames.FileName), "{not json"); Assert.Empty(ComponentNames.Load(dir)); }
+        finally { Directory.Delete(dir, true); }
+    }
+
+    [Fact]
+    public void NoComponents_WritesNothing()
+    {
+        string dir = TempDir();
+        try { ComponentNames.Save(dir, []); Assert.False(File.Exists(Path.Combine(dir, ComponentNames.FileName))); }
+        finally { Directory.Delete(dir, true); }
+    }
+}

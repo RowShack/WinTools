@@ -305,3 +305,37 @@ public static class PktmonCli
         }
     }
 }
+
+/// <summary>Remembers which component id was which adapter/driver for one capture (ids can change after a reboot), stored as components.json beside the .etl.</summary>
+public static class ComponentNames
+{
+    public const string FileName = "components.json";
+
+    public static void Save(string folder, IEnumerable<CaptureComponent> components)
+    {
+        var list = components.Select(c => new { id = c.Id, name = c.Name, type = c.Type }).ToList();
+        if (list.Count == 0) return;
+        File.WriteAllText(Path.Combine(folder, FileName), JsonSerializer.Serialize(list, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    /// <summary>Returns the saved id to component map, or an empty one if the file is missing or unreadable.</summary>
+    public static Dictionary<int, CaptureComponent> Load(string? folder)
+    {
+        var map = new Dictionary<int, CaptureComponent>();
+        try
+        {
+            string path = Path.Combine(folder ?? "", FileName);
+            if (!File.Exists(path)) return map;
+            using var doc = JsonDocument.Parse(File.ReadAllText(path));
+            foreach (var e in doc.RootElement.EnumerateArray())
+                if (e.TryGetProperty("id", out var id) && id.TryGetInt32(out int i))
+                    map[i] = new CaptureComponent(i, e.TryGetProperty("name", out var n) ? n.GetString() ?? "" : "", e.TryGetProperty("type", out var t) ? t.GetString() ?? "" : "", null, null);
+        }
+        catch (Exception ex) when (ex is JsonException or IOException or InvalidOperationException) { }
+        return map;
+    }
+
+    /// <summary>"18 · Intel Wi-Fi 6 AX201", or just "18" when the name is unknown.</summary>
+    public static string Label(int id, IReadOnlyDictionary<int, CaptureComponent> names) =>
+        names.TryGetValue(id, out var c) && c.Name.Length > 0 ? $"{id} · {c.Name}" : id.ToString();
+}

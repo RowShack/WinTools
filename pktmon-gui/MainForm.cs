@@ -72,6 +72,7 @@ public sealed class MainForm : Form
         var tabs = new TabControl { Dock = DockStyle.Fill };
         tabs.TabPages.AddRange([BuildCaptureTab(), _packets, BuildDropsTab()]);
         _packets.StatusChanged += t => _status.Text = t;
+        _packets.LiveComponents = () => _components;
         var bar = new StatusStrip(); bar.Items.Add(_status);
         Controls.Add(tabs); Controls.Add(bar);
 
@@ -319,6 +320,7 @@ public sealed class MainForm : Form
         _lastDir = Path.Combine(_folder.Text, $"capture-{DateTime.Now:yyyyMMdd-HHmmss}");
         try { Directory.CreateDirectory(_lastDir); } catch (Exception ex) { MessageBox.Show(this, "Can't create the output folder: " + ex.Message, Text); return; }
         _lastEtl = Path.Combine(_lastDir, "capture.etl");
+        try { ComponentNames.Save(_lastDir, _components); } catch { /* names are a convenience; never block a capture */ }
         var opt = ReadOptions(_lastEtl);
 
         SetBusy(true);
