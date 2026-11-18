@@ -50,7 +50,7 @@ The ETW session is stopped when you press *Stop capture*, when the window closes
 
 ## Caveats (please read)
 
-- The live ETW path (field order and port byte order of the provider's events, direction of source/destination on receive) is implemented from the documented event layout and unit-tested against synthetic payloads, but needs verification on real machines. If rates look swapped (download shown as upload) or ports look odd (e.g. 47873 instead of 443), please report it.
+- The live ETW path was checked on one Windows 11 machine (ports arrive byte-swapped, and the remote end is always `daddr`/`dport`; both are handled). Other Windows builds are untested; if rates look swapped or the remote/local columns look reversed, please report it.
 - Reverse DNS sends PTR queries for every remote IP you see, via your normal resolver. Untick *Resolve names* to avoid that.
 
 ## Libraries

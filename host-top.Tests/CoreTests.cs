@@ -346,9 +346,9 @@ public class DecoderTests
     }
 
     [Fact]
-    public void UdpReceiveLocalIsDestination()
+    public void UdpReceiveLocalIsStillSaddr()
     {
-        var e = EtwDecoder.Decode(43, T, P(new() { ["PID"] = 7, ["size"] = 100, ["saddr"] = "1.1.1.1", ["daddr"] = "192.168.1.10", ["sport"] = Net(53), ["dport"] = Net(5555) }))!.Value;
+        var e = EtwDecoder.Decode(43, T, P(new() { ["PID"] = 7, ["size"] = 100, ["saddr"] = "192.168.1.10", ["daddr"] = "1.1.1.1", ["sport"] = Net(5555), ["dport"] = Net(53) }))!.Value;
         Assert.False(e.IsSend);
         Assert.Equal(FlowProtocol.Udp, e.Protocol);
         Assert.Equal("1.1.1.1", e.Remote.ToString());

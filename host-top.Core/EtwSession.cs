@@ -32,11 +32,9 @@ public static class EtwDecoder
             var dport = ToPort(payload("dport"));
             var sport = ToPort(payload("sport"));
             if (pid is null || daddr is null || saddr is null || dport is null || sport is null || size is null) return null;
-            // Fields are packet-oriented: saddr/sport is the sender, daddr/dport the receiver.
-            // For a send the local end is the source; for a receive the local end is the destination.
-            return send
-                ? new FlowEvent(time, pid.Value, proto, saddr, sport.Value, daddr, dport.Value, size.Value, true)
-                : new FlowEvent(time, pid.Value, proto, daddr, dport.Value, saddr, sport.Value, size.Value, false);
+            // Confirmed on a real machine: for both sends and receives this provider puts the local end in saddr/sport
+            // and the remote end in daddr/dport (it is not packet-oriented on receive).
+            return new FlowEvent(time, pid.Value, proto, saddr, sport.Value, daddr, dport.Value, size.Value, send);
         }
         catch { return null; }
     }
