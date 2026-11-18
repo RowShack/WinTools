@@ -7,7 +7,8 @@ namespace SnmpLiveGraph.Core;
 
 public sealed record InterfaceInfo(int Index, string Name, string Alias, long HighSpeedMbps, int OperStatus)
 {
-    public string StatusText => OperStatus switch { 1 => "up", 2 => "down", 3 => "testing", 5 => "dormant", 7 => "lower-layer-down", _ => "?" };
+    public string StatusText => StatusName(OperStatus);
+    public static string StatusName(int s) => s switch { 1 => "up", 2 => "down", 3 => "testing", 4 => "unknown", 5 => "dormant", 6 => "not-present", 7 => "lower-layer-down", _ => "?" };
     public string Speed => HighSpeedMbps <= 0 ? "speed unknown" : HighSpeedMbps >= 1000 ? $"{HighSpeedMbps / 1000.0:0.##} Gbps" : $"{HighSpeedMbps} Mbps";
     public override string ToString() => $"{Name}{(Alias.Length > 0 ? "  \"" + Alias + "\"" : "")}  [{StatusText}, {Speed}]";
 }
@@ -65,7 +66,7 @@ public static class InterfaceDiscovery
 }
 
 public sealed record PollPoint(DateTime Time, double? InBps, double? OutBps, double? InUtil, double? OutUtil,
-    double? InErrors, double? OutErrors, double? InDiscards, double? OutDiscards, RateSkip Skipped);
+    double? InErrors, double? OutErrors, double? InDiscards, double? OutDiscards, RateSkip Skipped, int OperStatus = 0);
 
 /// <summary>Polls all selected interfaces of one device with batched GETs and turns counters into rates.</summary>
 public sealed class DevicePoller
@@ -80,6 +81,14 @@ public sealed class DevicePoller
     private readonly SnmpSession _session;
     private readonly Dictionary<int, Channel> _channels = [];
     private bool? _use64;
+    private readonly StatusTracker _status = new();
+    private readonly Dictionary<string, CustomChannel> _custom = [];
+
+    private sealed class CustomChannel
+    {
+        public CustomOidSpec Spec = null!;
+        public RateCalculator? Rate;
+    }
 
     public DevicePoller(SnmpSession session, IEnumerable<InterfaceInfo> interfaces)
     {
@@ -91,6 +100,21 @@ public sealed class DevicePoller
     public event Action<InterfaceInfo, PollPoint>? Point;
     public event Action<string>? Error;
     public event Action? Recovered;
+    /// <summary>Raised when an interface's ifOperStatus differs from the previous poll.</summary>
+    public event Action<StatusChange>? StatusChanged;
+    public event Action<CustomOidSpec, CustomPoint>? CustomPoint;
+
+    /// <summary>Sets the ad-hoc OIDs polled alongside the interfaces (keeps rate state for OIDs that stay).</summary>
+    public void SetCustomOids(IEnumerable<CustomOidSpec> specs)
+    {
+        var keep = specs.GroupBy(x => x.Oid).ToDictionary(g => g.Key, g => g.First());
+        foreach (var k in _custom.Keys.Where(k => !keep.ContainsKey(k)).ToList()) _custom.Remove(k);
+        foreach (var sp in keep.Values)
+            if (_custom.TryGetValue(sp.Oid, out var ch)) { if (ch.Spec.AsCounter != sp.AsCounter) ch.Rate = null; ch.Spec = sp; }
+            else _custom[sp.Oid] = new CustomChannel { Spec = sp };
+    }
+
+    public bool HasWork => _channels.Count > 0 || _custom.Count > 0;
 
     public void SetInterfaces(IEnumerable<InterfaceInfo> interfaces)
     {
@@ -124,9 +148,10 @@ public sealed class DevicePoller
     public async Task PollOnceAsync(CancellationToken ct)
     {
         var chans = _channels.Values.ToList();
-        if (chans.Count == 0) return;
-        _use64 ??= await Detect64Async(chans[0].If.Index, ct);
-        bool hc = _use64.Value;
+        var customs = _custom.Values.ToList();
+        if (chans.Count == 0 && customs.Count == 0) return;
+        if (chans.Count > 0) _use64 ??= await Detect64Async(chans[0].If.Index, ct);
+        bool hc = _use64 ?? false;
         string inOid = hc ? SnmpSession.Oids.IfHCIn : SnmpSession.Oids.IfIn32;
         string outOid = hc ? SnmpSession.Oids.IfHCOut : SnmpSession.Oids.IfOut32;
 
@@ -135,8 +160,10 @@ public sealed class DevicePoller
         {
             int i = c.If.Index;
             oids.AddRange([$"{inOid}.{i}", $"{outOid}.{i}", $"{SnmpSession.Oids.IfInErrors}.{i}", $"{SnmpSession.Oids.IfOutErrors}.{i}",
-                           $"{SnmpSession.Oids.IfInDiscards}.{i}", $"{SnmpSession.Oids.IfOutDiscards}.{i}"]);
+                           $"{SnmpSession.Oids.IfInDiscards}.{i}", $"{SnmpSession.Oids.IfOutDiscards}.{i}",
+                           $"{SnmpSession.Oids.IfOperStatus}.{i}"]);
         }
+        foreach (var cu in customs) oids.Add(cu.Spec.Oid);
 
         var values = new Dictionary<string, ISnmpData?>();
         foreach (var batch in oids.Chunk(40))                       // keep each request small enough for any agent
@@ -144,9 +171,29 @@ public sealed class DevicePoller
         var now = DateTime.UtcNow;
         long uptime = values.GetValueOrDefault(SnmpSession.Oids.SysUpTime) is TimeTicks tt ? tt.ToUInt32() : 0;
 
+        foreach (var cu in customs)
+        {
+            var sp = cu.Spec;
+            values.TryGetValue(sp.Oid, out var raw);
+            CustomPoint cp;
+            if (!sp.AsCounter) { var rd = OidParser.Parse(raw, sp.Scale); cp = new CustomPoint(now, rd.Value, rd.Problem); }
+            else if (raw is Counter32 or Counter64 or Gauge32 or Integer32 or TimeTicks)
+            {
+                cu.Rate ??= new RateCalculator(raw is Counter64 ? 64 : 32);
+                var rr = cu.Rate.Next(new CounterSample(now, InterfaceDiscovery.NumU(raw), uptime));
+                cp = new CustomPoint(now, rr.PerSecond * sp.Scale, null);   // null value without a problem = first sample / skipped sample
+            }
+            else { var rd = OidParser.Parse(raw, sp.Scale); cp = new CustomPoint(now, null, rd.Problem ?? "Not a counter value."); }
+            CustomPoint?.Invoke(sp, cp);
+        }
+
         foreach (var c in chans)
         {
             int i = c.If.Index;
+            int status = (int)InterfaceDiscovery.Num(values.GetValueOrDefault($"{SnmpSession.Oids.IfOperStatus}.{i}"));
+            _status.Seed(i, c.If.OperStatus);   // baseline from discovery; no-op once the interface has been seen
+            if (_status.Observe(i, status) is int from)
+                StatusChanged?.Invoke(new StatusChange(now, Target.ToString(), i, c.If.Name, from, status));
             c.InOct ??= new RateCalculator(hc ? 64 : 32);
             c.OutOct ??= new RateCalculator(hc ? 64 : 32);
             RateResult R(RateCalculator calc, string oid)
@@ -166,7 +213,7 @@ public sealed class DevicePoller
             Point?.Invoke(c.If, new PollPoint(now, inBps, outBps,
                 inBps is double ib ? RateCalculator.Utilisation(ib, c.If.HighSpeedMbps) : null,
                 outBps is double ob ? RateCalculator.Utilisation(ob, c.If.HighSpeedMbps) : null,
-                rie.PerSecond, roe.PerSecond, rid.PerSecond, rod.PerSecond, rin.Skipped));
+                rie.PerSecond, roe.PerSecond, rid.PerSecond, rod.PerSecond, rin.Skipped, status));
         }
     }
 
@@ -209,6 +256,10 @@ public sealed class SavedDevice
     public string? ProtectedAuthPassword { get; set; }
     public string? ProtectedPrivPassword { get; set; }
     public List<int> InterfaceIndexes { get; set; } = [];
+    /// <summary>Per-interface alarm levels, keyed by ifIndex.</summary>
+    public Dictionary<int, Threshold> Thresholds { get; set; } = [];
+    /// <summary>Ad-hoc OID tiles of this device.</summary>
+    public List<CustomOidSpec> CustomOids { get; set; } = [];
     public Dictionary<int, string> InterfaceNames { get; set; } = [];
 }
 
@@ -234,7 +285,8 @@ public static class SessionStore
         catch (CryptographicException) { return ""; }
     }
 
-    public static SavedDevice ToSaved(SnmpTarget t, IEnumerable<InterfaceInfo> selected)
+    public static SavedDevice ToSaved(SnmpTarget t, IEnumerable<InterfaceInfo> selected,
+        IReadOnlyDictionary<int, Threshold>? thresholds = null, IEnumerable<CustomOidSpec>? customOids = null)
     {
         var list = selected.ToList();
         return new SavedDevice
@@ -242,6 +294,9 @@ public static class SessionStore
             Name = t.Name, Host = t.Host, Port = t.Port, Version = t.Version, User = t.User, Auth = t.Auth, Priv = t.Priv,
             ProtectedCommunity = Protect(t.Community), ProtectedAuthPassword = Protect(t.AuthPassword), ProtectedPrivPassword = Protect(t.PrivPassword),
             InterfaceIndexes = list.Select(i => i.Index).ToList(), InterfaceNames = list.ToDictionary(i => i.Index, i => i.Name),
+            Thresholds = (thresholds ?? new Dictionary<int, Threshold>()).Where(kv => kv.Value.IsSet && list.Any(i => i.Index == kv.Key))
+                .ToDictionary(kv => kv.Key, kv => new Threshold { UtilPercent = kv.Value.UtilPercent, ErrorsPerSec = kv.Value.ErrorsPerSec }),
+            CustomOids = (customOids ?? []).Select(c => new CustomOidSpec { Name = c.Name, Oid = c.Oid, AsCounter = c.AsCounter, Scale = c.Scale, Unit = c.Unit }).ToList(),
         };
     }
 
@@ -263,6 +318,14 @@ public static class CsvExport
         static string F(double? v) => v?.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) ?? "";
         foreach (var (s, p) in rows)
             sb.Append($"{p.Time:O},\"{s.Replace("\"", "\"\"")}\",{F(p.InBps)},{F(p.OutBps)},{F(p.InUtil)},{F(p.OutUtil)},{F(p.InErrors)},{F(p.OutErrors)},{F(p.InDiscards)},{F(p.OutDiscards)}\r\n");
+        return sb.ToString();
+    }
+
+    public static string BuildCustom(IEnumerable<(string Series, CustomPoint P)> rows)
+    {
+        var sb = new StringBuilder("time_utc,series,value,note\r\n");
+        foreach (var (s, p) in rows)
+            sb.Append($"{p.Time:O},\"{s.Replace("\"", "\"\"")}\",{p.Value?.ToString("0.######", System.Globalization.CultureInfo.InvariantCulture)},\"{(p.Problem ?? "").Replace("\"", "\"\"")}\"\r\n");
         return sb.ToString();
     }
 }

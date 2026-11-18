@@ -13,12 +13,17 @@ public sealed class MainForm : Form
         public HashSet<int> Selected = [];
         public DevicePoller? Poller;
         public CancellationTokenSource? Cts;
+        public Dictionary<int, Threshold> Thresholds = [];
+        public List<CustomOidSpec> CustomOids = [];
         public string Health = "";
         public override string ToString() => Target + (Health.Length > 0 ? "  (" + Health + ")" : "");
     }
 
     private readonly List<Device> _devices = [];
     private readonly Dictionary<string, Tile> _tiles = [];
+    private readonly Dictionary<string, OidTile> _oidTiles = [];
+    private readonly StatusLog _statusLog = new();
+    private readonly ListView _logView = new() { Dock = DockStyle.Fill, View = View.Details, FullRowSelect = true, GridLines = true, HideSelection = false };
     private readonly ListBox _deviceList = new() { Dock = DockStyle.Top, Height = 130, IntegralHeight = false };
     private readonly TextBox _search = new() { Dock = DockStyle.Top, PlaceholderText = "search interfaces (name, description)…" };
     private readonly CheckedListBox _ifList = new() { Dock = DockStyle.Fill, CheckOnClick = true, IntegralHeight = false };
@@ -44,7 +49,8 @@ public sealed class MainForm : Form
 
         var devButtons = new FlowLayoutPanel { Dock = DockStyle.Top, AutoSize = true, WrapContents = true };
         devButtons.Controls.AddRange([Btn("Add device…", async () => await AddDeviceAsync()), Btn("Edit…", async () => await EditDeviceAsync()),
-            Btn("Remove", RemoveDevice), Btn("Rediscover", async () => { if (Current != null) await DiscoverAsync(Current); })]);
+            Btn("Remove", RemoveDevice), Btn("Rediscover", async () => { if (Current != null) await DiscoverAsync(Current); }),
+            Btn("Graph an OID…", AddOid)]);
 
         var left = new Panel { Dock = DockStyle.Left, Width = 400, Padding = new Padding(6) };
         var ifBox = new GroupBox { Text = "Interfaces of the selected device (tick to graph)", Dock = DockStyle.Fill, Padding = new Padding(6) };
@@ -58,7 +64,7 @@ public sealed class MainForm : Form
             new Label { Text = "Show last", AutoSize = true, Margin = new Padding(0, 8, 4, 0) }, _window, new Label { Width = 12 },
             _pause, Btn("Clear", ClearAll), Btn("Export CSV…", ExportCsv), Btn("Export all PNGs…", ExportPngs), Btn("Save session…", SaveSession), Btn("Load session…", async () => await LoadSessionAsync())]);
         var right = new Panel { Dock = DockStyle.Fill };
-        right.Controls.Add(_tilePanel); right.Controls.Add(bar);
+        right.Controls.Add(_tilePanel); right.Controls.Add(BuildLogPanel()); right.Controls.Add(bar);
 
         var statusBar = new StatusStrip(); statusBar.Items.Add(_status);
         Controls.Add(right); Controls.Add(left); Controls.Add(statusBar);
@@ -68,9 +74,9 @@ public sealed class MainForm : Form
         _search.TextChanged += (_, _) => ShowInterfaces();
         _ifList.ItemCheck += (_, e) => { if (!_updatingChecks) BeginInvoke(() => OnItemChecked((InterfaceInfo)_ifList.Items[e.Index], e.NewValue == CheckState.Checked)); };
         _interval.ValueChanged += (_, _) => RestartPollers();
-        _window.SelectedIndexChanged += (_, _) => { foreach (var t in _tiles.Values) t.SetWindow(Window()); };
+        _window.SelectedIndexChanged += (_, _) => { foreach (var t in _tiles.Values) t.SetWindow(Window()); foreach (var t in _oidTiles.Values) t.SetWindow(Window()); };
         _pause.Click += (_, _) => TogglePause();
-        _redraw.Tick += (_, _) => { if (!_paused) foreach (var t in _tiles.Values) t.Redraw(); };
+        _redraw.Tick += (_, _) => { if (!_paused) { foreach (var t in _tiles.Values) t.Redraw(); foreach (var t in _oidTiles.Values) t.Redraw(); } };
         _redraw.Start();
         FormClosing += (_, _) => { foreach (var d in _devices) d.Cts?.Cancel(); };
     }
@@ -79,7 +85,45 @@ public sealed class MainForm : Form
     {
         int w = Math.Max(300, _tilePanel.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - 12);
         foreach (var t in _tiles.Values) t.Width = w;
+        foreach (var t in _oidTiles.Values) t.Width = w;
     }
+
+    private Control BuildLogPanel()
+    {
+        _logView.Columns.Add("Time", 150); _logView.Columns.Add("Device", 140); _logView.Columns.Add("Interface", 130); _logView.Columns.Add("Change", 200);
+        var buttons = new FlowLayoutPanel { Dock = DockStyle.Right, Width = 110, FlowDirection = FlowDirection.TopDown, WrapContents = false };
+        buttons.Controls.AddRange([Btn("Copy", CopyLog), Btn("Export…", ExportLog), Btn("Clear", ClearLog)]);
+        var box = new GroupBox { Text = "Interface status changes (while watching)", Dock = DockStyle.Bottom, Height = 150, Padding = new Padding(6) };
+        box.Controls.Add(_logView); box.Controls.Add(buttons);
+        return box;
+    }
+
+    private void OnStatusChange(StatusChange c)
+    {
+        _statusLog.Add(c);
+        var item = new ListViewItem([c.Time.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"), c.Device, c.Interface, $"{c.FromText} → {c.ToText}"])
+        { ForeColor = c.WentDown ? Color.Firebrick : c.CameUp ? Color.SeaGreen : SystemColors.ControlText };
+        _logView.Items.Insert(0, item);
+        _status.Text = $"{c.Device} {c.Interface}: {c.FromText} → {c.ToText}";
+    }
+
+    private void CopyLog()
+    {
+        if (_statusLog.Items.Count == 0) return;
+        Clipboard.SetText(_statusLog.ToText());
+        _status.Text = $"Copied {_statusLog.Items.Count} status change(s) to the clipboard.";
+    }
+
+    private void ExportLog()
+    {
+        if (_statusLog.Items.Count == 0) { MessageBox.Show(this, "No status changes recorded yet.", Text); return; }
+        using var d = new SaveFileDialog { FileName = "interface-status-changes.csv", Filter = "CSV|*.csv|Text|*.txt" };
+        if (d.ShowDialog(this) != DialogResult.OK) return;
+        File.WriteAllText(d.FileName, d.FilterIndex == 2 ? _statusLog.ToText() : _statusLog.ToCsv(), Encoding.UTF8);
+        _status.Text = "Exported " + d.FileName;
+    }
+
+    private void ClearLog() { _statusLog.Clear(); _logView.Items.Clear(); }
 
     private static Button Btn(string t, Action a) { var b = new Button { Text = t, AutoSize = true }; b.Click += (_, _) => a(); return b; }
     private TimeSpan Window() => _window.SelectedIndex switch { 0 => TimeSpan.FromMinutes(5), 2 => TimeSpan.FromHours(1), _ => TimeSpan.FromMinutes(15) };
@@ -113,6 +157,7 @@ public sealed class MainForm : Form
         if (Current is not { } d) return;
         d.Cts?.Cancel();
         foreach (var key in _tiles.Keys.Where(k => k.StartsWith(DeviceKey(d) + "|")).ToList()) RemoveTile(key);
+        foreach (var key in _oidTiles.Keys.Where(k => k.StartsWith(DeviceKey(d) + "|")).ToList()) RemoveOidTile(key);
         _devices.Remove(d); _deviceList.Items.Remove(d); _ifList.Items.Clear();
     }
 
@@ -164,15 +209,45 @@ public sealed class MainForm : Form
         if (on)
         {
             d.Selected.Add(i.Index);
-            if (!_tiles.ContainsKey(key))
-            {
-                var t = new Tile(key, d.Target.ToString(), i);
-                t.SetWindow(Window()); t.CloseRequested += tt => UncheckTile(tt);
-                _tiles[key] = t; _tilePanel.Controls.Add(t); FitTiles();
-            }
+            if (!_tiles.ContainsKey(key)) AddTile(d, i);
         }
         else { d.Selected.Remove(i.Index); RemoveTile(key); }
         ApplySelection(d);
+    }
+
+    private void AddTile(Device d, InterfaceInfo i)
+    {
+        string key = $"{DeviceKey(d)}|{i.Index}";
+        var t = new Tile(key, d.Target.ToString(), i);
+        t.SetWindow(Window()); t.Pause(_paused); t.CloseRequested += UncheckTile;
+        t.SetThreshold(d.Thresholds.GetValueOrDefault(i.Index));
+        t.ThresholdChanged += tt => { if (tt.Threshold is { } th) d.Thresholds[tt.If.Index] = th; else d.Thresholds.Remove(tt.If.Index); };
+        _tiles[key] = t; _tilePanel.Controls.Add(t); FitTiles();
+    }
+
+    private void AddOid()
+    {
+        if (Current is not { } d) { MessageBox.Show(this, "Add or select a device first.", Text); return; }
+        using var dlg = new AddOidDialog(d.Session, d.Target.ToString());
+        if (dlg.ShowDialog(this) != DialogResult.OK) return;
+        if (d.CustomOids.Any(c => c.Oid == dlg.Result.Oid)) { _status.Text = "That OID is already graphed for this device."; return; }
+        d.CustomOids.Add(dlg.Result);
+        AddOidTile(d, dlg.Result);
+        ApplySelection(d);
+    }
+
+    private void AddOidTile(Device d, CustomOidSpec spec)
+    {
+        string key = $"{DeviceKey(d)}|oid|{spec.Oid}";
+        var t = new OidTile(key, d.Target.ToString(), spec);
+        t.SetWindow(Window()); t.Pause(_paused);
+        t.CloseRequested += tt => { d.CustomOids.RemoveAll(c => c.Oid == tt.Spec.Oid); RemoveOidTile(tt.Key); ApplySelection(d); };
+        _oidTiles[key] = t; _tilePanel.Controls.Add(t); FitTiles();
+    }
+
+    private void RemoveOidTile(string key)
+    {
+        if (_oidTiles.Remove(key, out var t)) { _tilePanel.Controls.Remove(t); t.Dispose(); }
     }
 
     private void UncheckTile(Tile t)
@@ -191,9 +266,9 @@ public sealed class MainForm : Form
     private void ApplySelection(Device d)
     {
         var chosen = d.Interfaces.Where(i => d.Selected.Contains(i.Index)).ToList();
-        if (chosen.Count == 0) { d.Cts?.Cancel(); d.Poller = null; _status.Text = "Nothing selected for " + d.Target; return; }
+        if (chosen.Count == 0 && d.CustomOids.Count == 0) { d.Cts?.Cancel(); d.Poller = null; _status.Text = "Nothing selected for " + d.Target; return; }
         if (d.Poller == null) { d.Poller = MakePoller(d, chosen); StartPoller(d); }
-        else d.Poller.SetInterfaces(chosen);
+        else { d.Poller.SetInterfaces(chosen); d.Poller.SetCustomOids(d.CustomOids); }
     }
 
     // ================= polling =================
@@ -201,6 +276,9 @@ public sealed class MainForm : Form
     private DevicePoller MakePoller(Device d, List<InterfaceInfo> chosen)
     {
         var p = new DevicePoller(d.Session, chosen);
+        p.SetCustomOids(d.CustomOids);
+        p.StatusChanged += c => { if (!IsDisposed) BeginInvoke(() => OnStatusChange(c)); };
+        p.CustomPoint += (spec, cp) => { if (!IsDisposed) BeginInvoke(() => { if (_oidTiles.TryGetValue($"{DeviceKey(d)}|oid|{spec.Oid}", out var t)) t.Add(cp); }); };
         p.Point += (iface, pt) => { if (!IsDisposed) BeginInvoke(() => { if (_tiles.TryGetValue($"{DeviceKey(d)}|{iface.Index}", out var t)) t.Add(pt); }); };
         p.Error += msg => { if (!IsDisposed) BeginInvoke(() => { d.Health = "no response"; RefreshDeviceList(d); _status.Text = $"{d.Target}: {msg}"; }); };
         p.Recovered += () => { if (!IsDisposed) BeginInvoke(() => { d.Health = ""; RefreshDeviceList(d); _status.Text = $"{d.Target}: polling again"; }); };
@@ -212,7 +290,7 @@ public sealed class MainForm : Form
         d.Cts?.Cancel();
         if (_paused) return;
         var chosen = d.Interfaces.Where(i => d.Selected.Contains(i.Index)).ToList();
-        if (chosen.Count == 0) return;
+        if (chosen.Count == 0 && d.CustomOids.Count == 0) return;
         d.Poller ??= MakePoller(d, chosen);
         d.Cts = new CancellationTokenSource();
         var poller = d.Poller; var ct = d.Cts.Token; var every = TimeSpan.FromSeconds((double)_interval.Value);
@@ -227,31 +305,40 @@ public sealed class MainForm : Form
         _paused = !_paused;
         _pause.Text = _paused ? "Resume" : "Pause";
         foreach (var t in _tiles.Values) t.Pause(_paused);
+        foreach (var t in _oidTiles.Values) t.Pause(_paused);
         if (_paused) { foreach (var d in _devices) d.Cts?.Cancel(); _status.Text = "Paused"; }
         else RestartPollers();
     }
 
-    private void ClearAll() { foreach (var t in _tiles.Values) t.Clear(); }
+    private void ClearAll() { foreach (var t in _tiles.Values) t.Clear(); foreach (var t in _oidTiles.Values) t.Clear(); }
 
     // ================= export / session =================
 
     private void ExportCsv()
     {
-        if (_tiles.Count == 0) return;
+        if (_tiles.Count == 0 && _oidTiles.Count == 0) return;
         using var d = new SaveFileDialog { FileName = "snmp-live-graph.csv", Filter = "CSV|*.csv" };
         if (d.ShowDialog(this) != DialogResult.OK) return;
         var rows = _tiles.Values.SelectMany(t => t.History.Points.Select(p => (t.Series, p))).OrderBy(r => r.p.Time);
         File.WriteAllText(d.FileName, CsvExport.Build(rows), Encoding.UTF8);
         _status.Text = "Exported " + d.FileName;
+        if (_oidTiles.Count > 0)
+        {
+            string oidFile = Path.Combine(Path.GetDirectoryName(d.FileName)!, Path.GetFileNameWithoutExtension(d.FileName) + "-oids.csv");
+            var orows = _oidTiles.Values.SelectMany(t => t.History.Points.Select(p => (t.Series, p))).OrderBy(r => r.p.Time);
+            File.WriteAllText(oidFile, CsvExport.BuildCustom(orows), Encoding.UTF8);
+            _status.Text = $"Exported {d.FileName} and {oidFile}";
+        }
     }
 
     private void ExportPngs()
     {
-        if (_tiles.Count == 0) return;
+        if (_tiles.Count == 0 && _oidTiles.Count == 0) return;
         using var d = new FolderBrowserDialog { Description = "Folder for the chart images" };
         if (d.ShowDialog(this) != DialogResult.OK) return;
         foreach (var t in _tiles.Values) t.SavePng(Path.Combine(d.SelectedPath, t.Series.Replace('/', '-').Replace(' ', '_').Replace(':', '-') + ".png"));
-        _status.Text = $"Saved {_tiles.Count} image(s) to {d.SelectedPath}";
+        foreach (var t in _oidTiles.Values) t.SavePng(Path.Combine(d.SelectedPath, t.Series.Replace('/', '-').Replace(' ', '_').Replace(':', '-') + ".png"));
+        _status.Text = $"Saved {_tiles.Count + _oidTiles.Count} image(s) to {d.SelectedPath}";
     }
 
     private void SaveSession()
@@ -259,7 +346,7 @@ public sealed class MainForm : Form
         using var d = new SaveFileDialog { FileName = "snmp-session.json", Filter = "Session|*.json" };
         if (d.ShowDialog(this) != DialogResult.OK) return;
         var s = new SavedSession { IntervalSeconds = (int)_interval.Value, WindowMinutes = (int)Window().TotalMinutes };
-        foreach (var dev in _devices) s.Devices.Add(SessionStore.ToSaved(dev.Target, dev.Interfaces.Where(i => dev.Selected.Contains(i.Index))));
+        foreach (var dev in _devices) s.Devices.Add(SessionStore.ToSaved(dev.Target, dev.Interfaces.Where(i => dev.Selected.Contains(i.Index)), dev.Thresholds, dev.CustomOids));
         SessionStore.Save(d.FileName, s);
         _status.Text = "Session saved (passwords and communities are encrypted for your Windows account).";
     }
@@ -277,15 +364,16 @@ public sealed class MainForm : Form
             var dev = new Device { Target = SessionStore.ToTarget(sd) };
             dev.Session = new SnmpSession(dev.Target);
             _devices.Add(dev); _deviceList.Items.Add(dev); _deviceList.SelectedItem = dev;
+            dev.Thresholds = sd.Thresholds.Where(kv => kv.Value.IsSet).ToDictionary(kv => kv.Key, kv => kv.Value);
+            dev.CustomOids = sd.CustomOids.Where(c => CustomOidSpec.Validate(c.Oid) is null).ToList();
             await DiscoverAsync(dev);
+            foreach (var spec in dev.CustomOids) AddOidTile(dev, spec);
             foreach (var idx in sd.InterfaceIndexes)
             {
                 var iface = dev.Interfaces.FirstOrDefault(i => i.Index == idx);
                 if (iface == null) continue;
                 dev.Selected.Add(idx);
-                string key = $"{DeviceKey(dev)}|{idx}";
-                var t = new Tile(key, dev.Target.ToString(), iface); t.SetWindow(Window()); t.CloseRequested += tt => UncheckTile(tt);
-                _tiles[key] = t; _tilePanel.Controls.Add(t); FitTiles();
+                if (!_tiles.ContainsKey($"{DeviceKey(dev)}|{idx}")) AddTile(dev, iface);
             }
             ShowInterfaces(); ApplySelection(dev);
         }
