@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HostTop.Core</RootNamespace>
+    <AssemblyName>HostTop.Core</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- MIT licence. ETW consumer; no driver is installed. -->
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.2.8" />
+  </ItemGroup>
+</Project>

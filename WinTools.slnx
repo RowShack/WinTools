@@ -11,6 +11,15 @@
   <Folder Name="/dhcp-finder/">
     <Project Path="dhcp-finder/DhcpFinder.csproj" />
   </Folder>
+  <Folder Name="/host-top.Core/">
+    <Project Path="host-top.Core/HostTop.Core.csproj" />
+  </Folder>
+  <Folder Name="/host-top.Tests/">
+    <Project Path="host-top.Tests/HostTop.Tests.csproj" />
+  </Folder>
+  <Folder Name="/host-top/">
+    <Project Path="host-top/HostTop.csproj" />
+  </Folder>
   <Folder Name="/mtu-finder.Core/">
     <Project Path="mtu-finder.Core/MtuFinder.Core.csproj" />
   </Folder>
