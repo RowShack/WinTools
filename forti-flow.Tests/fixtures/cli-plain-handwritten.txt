@@ -1,0 +1,11 @@
+FGT-LAB # diagnose debug flow trace start 2
+vd-root:0 received a packet(proto=1, 192.0.2.10:1->198.51.100.5:2048) tun_id=0.0.0.0 from port2. type=8, code=0, id=1, seq=1.
+allocate a new session-0000b001
+find a route: flag=04000000 gw-203.0.113.1 via port1
+Allowed by Policy-7:
+send out via dev-port1, dst-mac-00:00:5e:00:53:01
+
+vd-root:0 received a packet(proto=1, 198.51.100.5:1->192.0.2.10:0) tun_id=0.0.0.0 from port1. type=0, code=0, id=1, seq=1.
+Find an existing session, id-0000b001, reply direction
+send out via dev-port2, dst-mac-00:00:5e:00:53:02
+FGT-LAB #

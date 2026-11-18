@@ -1,0 +1,17 @@
+FGT-LAB # diagnose debug reset
+FGT-LAB # diagnose debug flow filter saddr 192.0.2.10
+FGT-LAB # diagnose debug flow trace start 5
+FGT-LAB # diagnose debug enable
+2026-11-18 10:00:01 id=20085 trace_id=1 func=print_pkt_detail line=5842 msg="vd-root:0 received a packet(proto=6, 192.0.2.10:49152->198.51.100.5:443) tun_id=0.0.0.0 from port2. flag [S], seq 1000, ack 0, win 8192"
+2026-11-18 10:00:01 id=20085 trace_id=1 func=init_ip_session_common line=5999 msg="allocate a new session-0000a001"
+2026-11-18 10:00:01 id=20085 trace_id=1 func=vf_ip_route_input_common line=2605 msg="find a route: flag=04000000 gw-203.0.113.1 via port1"
+2026-11-18 10:00:01 id=20085 trace_id=1 func=fw_forward_handler line=900 msg="Allowed by Policy-7:"
+2026-11-18 10:00:01 id=20085 trace_id=1 func=__ip_session_run_tuple line=3500 msg="SNAT 192.0.2.10->203.0.113.4:49152"
+2026-11-18 10:00:01 id=20085 trace_id=1 func=ip_session_confirm_final line=3600 msg="send out via dev-port1, dst-mac-00:00:5e:00:53:01"
+2026-11-18 10:00:02 id=20085 trace_id=2 func=print_pkt_detail line=5842 msg="vd-root:0 received a packet(proto=6, 192.0.2.10:49153->198.51.100.5:22) tun_id=0.0.0.0 from port2. flag [S], seq 2000, ack 0, win 8192"
+2026-11-18 10:00:02 id=20085 trace_id=2 func=init_ip_session_common line=5999 msg="allocate a new session-0000a002"
+2026-11-18 10:00:02 id=20085 trace_id=2 func=vf_ip_route_input_common line=2605 msg="find a route: flag=04000000 gw-203.0.113.1 via port1"
+2026-11-18 10:00:02 id=20085 trace_id=2 func=fw_forward_handler line=700 msg="Denied by forward policy check (policy 0)"
+2026-11-18 10:00:03 id=20085 trace_id=3 func=print_pkt_detail line=5842 msg="vd-root:0 received a packet(proto=6, 192.0.2.10:49154->198.51.100.5:25) tun_id=0.0.0.0 from port2. flag [S], seq 3000, ack 0, win 8192"
+2026-11-18 10:00:03 id=20085 trace_id=3 func=vf_ip_route_input_common line=2605 msg="reverse path check fail, drop"
+FGT-LAB #

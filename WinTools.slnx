@@ -11,6 +11,15 @@
   <Folder Name="/dhcp-finder/">
     <Project Path="dhcp-finder/DhcpFinder.csproj" />
   </Folder>
+  <Folder Name="/forti-flow.Core/">
+    <Project Path="forti-flow.Core/FortiFlow.Core.csproj" />
+  </Folder>
+  <Folder Name="/forti-flow.Tests/">
+    <Project Path="forti-flow.Tests/FortiFlow.Tests.csproj" />
+  </Folder>
+  <Folder Name="/forti-flow/">
+    <Project Path="forti-flow/FortiFlow.csproj" />
+  </Folder>
   <Folder Name="/mtu-finder.Core/">
     <Project Path="mtu-finder.Core/MtuFinder.Core.csproj" />
   </Folder>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>FortiFlow.Core</RootNamespace>
+    <AssemblyName>FortiFlow.Core</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="rules\default-rules.json" LogicalName="FortiFlow.Core.default-rules.json" />
+  </ItemGroup>
+</Project>

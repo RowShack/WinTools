@@ -1,0 +1,348 @@
+{
+  "schemaVersion": 1,
+  "_comment": "FortiFlow rules. Each rule matches ONE message line (after timestamps, CSV columns and 'id= trace_id= func= msg=' prefixes are removed). First matching rule wins; rules in an override file are tried before these. See forti-flow/README.md for the schema.",
+  "verdicts": {
+    "forwarded": {
+      "title": "Forwarded",
+      "explain": "The FortiGate accepted the packet and sent it on ({out}). {policyNote}",
+      "nextCheck": "If the application still fails, check the reply direction (is the reply packet seen, and does it use the same session?) and the far end."
+    },
+    "forwarded-offload": {
+      "title": "Forwarded (session offloaded to the NPU)",
+      "explain": "The packet matched an established session and the FortiGate is offloading that session to the NPU/ASIC. The packet itself is then forwarded in hardware, so no 'send out' line appears in the trace.",
+      "nextCheck": "Nothing to check for this packet. Once a session is offloaded its later packets will not show up in 'diagnose debug flow' at all."
+    },
+    "local-in": {
+      "title": "Local-in (traffic to the FortiGate itself)",
+      "explain": "The packet is addressed to the FortiGate ({dst}) and was accepted by the local-in checks. Several 'act-drop' lines in the policy lists are normal here: each group of local-in policies is checked in turn and only the final result counts.",
+      "nextCheck": "If the service (admin GUI, SSH, VPN, ping...) does not answer, check that the service is listening on this interface and look at the reply packet (it arrives 'from local')."
+    },
+    "local-in-existing": {
+      "title": "Local-in (established session)",
+      "explain": "A further packet to the FortiGate itself on a session that was already accepted as local-in. The trace shows only the session lookup because established sessions are not checked against the policies again.",
+      "nextCheck": "Nothing to check for this packet; look at the first packet of the session for the policy decision, and at the replies (from 'local') for the service response."
+    },
+    "dropped": {
+      "title": "Dropped",
+      "explain": "The final policy decision for this packet was 'drop' and nothing was sent out afterwards.",
+      "nextCheck": "Look at the highlighted line: find the policy it refers to, and check source/destination interface, addresses, service and schedule of the policy you expected to match."
+    },
+    "unknown": {
+      "title": "Outcome not visible",
+      "explain": "The trace for this packet ended without a clear accept, drop or egress line. The trace may be truncated, or the packet was handled in a way not covered by the rules.",
+      "nextCheck": "Capture again with 'show function-name enable' and enough packets (trace start N), and check that the whole packet was copied. Unknown lines are shown raw on the timeline - send them as new samples."
+    }
+  },
+  "rules": [
+    {
+      "id": "pkt-received",
+      "pattern": "^vd-(?<vd>[^\\s:]+)(?::\\d+)? received a packet\\(proto=(?<proto>\\d+), (?<src>[0-9a-fA-F:.]+?):(?<sport>\\d+)->(?<dst>[0-9a-fA-F:.]+?):(?<dport>\\d+)\\)(?: tun_id=(?<tun>\\S+))? from (?<iface>\\S+?)\\.(?:\\s|$)\\s*(?:flag \\[(?<flags>[^\\]]*)\\])?(?:type=(?<itype>\\d+), code=(?<icode>\\d+))?",
+      "card": "received",
+      "title": "Packet received on {iface}",
+      "text": "{proto_name} {src}:{sport} → {dst}:{dport}{extra}",
+      "effect": "received",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "session-new",
+      "pattern": "^allocate a new session-(?<session>[0-9a-fA-F]+)",
+      "card": "session",
+      "title": "New session {session}",
+      "text": "No existing session matched, so a new one was created. This is the first packet of the flow (original direction).",
+      "effect": "new-session",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "session-existing",
+      "pattern": "^Find an existing session, id-(?<session>[0-9a-fA-F]+), (?<direction>original|reply) direction",
+      "card": "session",
+      "title": "Existing session {session} ({direction} direction)",
+      "text": "The packet belongs to a session that is already in the session table. Policy is not evaluated again for established sessions.",
+      "effect": "existing-session",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "session-none",
+      "pattern": "^no session matched",
+      "card": "session",
+      "title": "No session matched",
+      "text": "The packet did not match any session.",
+      "effect": "no-session",
+      "explain": "A packet in the middle of a TCP stream with no session usually means the session timed out or was cleared, or traffic is asymmetric. Non-SYN TCP packets without a session are normally dropped by the firewall.",
+      "nextCheck": "Check whether the session expired (idle timeout) or whether the return traffic takes a different path through the firewall (asymmetric routing).",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "route-found",
+      "pattern": "^find a route: flag=(?<flag>[0-9a-fA-F]+) gw-(?<gw>\\S+) via (?<egress>\\S+)",
+      "card": "route",
+      "title": "Route: out via {egress}",
+      "text": "Next hop / gateway {gw}, egress interface {egress}. An egress of 'root' means the destination is an address of the FortiGate itself (local-in).",
+      "effect": "route",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "route-policy",
+      "pattern": "^Match policy routing id=(?<id>\\S+): to (?<to>\\S+) via ifindex-(?<ifindex>\\d+)",
+      "card": "route",
+      "title": "Policy route {id} matched",
+      "text": "Policy-based routing sends traffic to {to} out of interface index {ifindex}, overriding the normal routing table.",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "policy-check",
+      "pattern": "^checked gnum-(?<gnum>[0-9a-fA-F]+) policy-(?<policy>\\d+), ret-(?<ret>[a-z-]+), act-(?<act>\\w+)",
+      "card": "policy-check",
+      "title": "Policy {policy} checked: {ret}",
+      "text": "Policy group {gnum}: policy {policy} -> {ret}, action {act}.",
+      "effect": "policy-check",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "policy-inactive",
+      "pattern": "^gnum-(?<gnum>[0-9a-fA-F]+) policy-(?<policy>\\d+) is not active",
+      "card": "policy",
+      "title": "Policy {policy} skipped: not active",
+      "text": "Policy {policy} (group {gnum}) is not active at the moment (disabled, or outside its schedule) and is skipped.",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "policy-matched",
+      "pattern": "^policy-(?<policy>\\d+) is matched, act-(?<act>\\w+)",
+      "card": "policy",
+      "title": "Policy {policy_label} matched: {act}",
+      "text": "The first policy that matches the packet decides: action '{act}'.",
+      "effect": "policy-match",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "policy-allowed",
+      "pattern": "^Allowed by Policy-(?<policy>\\d+)",
+      "card": "policy",
+      "title": "Allowed by policy {policy}",
+      "text": "Firewall policy {policy} accepts this traffic.",
+      "effect": "policy-allow",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "after-check",
+      "pattern": "^after check: ret-(?<ret>[a-z-]+), act-(?<act>\\w+)",
+      "card": "policy",
+      "title": "Policy list result: {act}",
+      "text": "Result of this policy group: ret-{ret}, act-{act}. Only the LAST result of the packet counts; intermediate 'act-drop' results are normal.",
+      "effect": "decision",
+      "minor": true,
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "group-result",
+      "pattern": "^gnum-(?<gnum>[0-9a-fA-F]+) check result: ret-(?<ret>[a-z-]+), act-(?<act>\\w+)",
+      "card": "detail",
+      "title": "Group {gnum} result {act}",
+      "text": "Policy group {gnum}: ret-{ret}, act-{act}.",
+      "minor": true,
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "group-start",
+      "pattern": "^gnum-(?<gnum>[0-9a-fA-F]+), (?:check-[0-9a-fA-F]+|use (?:int|addr/intf) hash.*)$",
+      "card": "detail",
+      "title": "Policy group {gnum}",
+      "text": "Start of policy group {gnum}.",
+      "minor": true,
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "iface-pair",
+      "pattern": "^in-\\[(?<in>[^\\]]*)\\], out-\\[(?<out>[^\\]]*)\\]",
+      "card": "detail",
+      "title": "Interfaces in-[{in}] out-[{out}]",
+      "text": "Ingress interface '{in}', egress interface '{out}' (empty = local-in / not yet known).",
+      "minor": true,
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "captive-check",
+      "pattern": "^after iprope_captive_check\\(\\)",
+      "card": "detail",
+      "title": "Captive portal check",
+      "text": "{raw}",
+      "minor": true,
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "detail-misc",
+      "pattern": "^(?:len=\\d+|result: skb_flags|ret-matched$|state=[0-9a-fA-F]+, state2=|dir-\\d+, tun_id=)",
+      "card": "detail",
+      "title": "Internal detail",
+      "text": "{raw}",
+      "minor": true,
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "npu-state",
+      "pattern": "^ses->npu_state=",
+      "card": "offload",
+      "title": "NPU offload state",
+      "text": "{raw}",
+      "minor": true,
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "offload-try",
+      "pattern": "^Trying to offloading session from (?<from>\\S+) to (?<to>\\S+)",
+      "card": "offload",
+      "effect": "offload",
+      "title": "Offload attempt {from} → {to}",
+      "text": "The FortiGate is trying to hand this session to the NPU/ASIC so later packets bypass the CPU. After that, 'diagnose debug flow' will no longer show the packets of this session.",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "fast-path",
+      "pattern": "^enter fast path",
+      "card": "offload",
+      "title": "Fast path (established session)",
+      "text": "The packet matched an established session and was forwarded by the fast path without a new policy lookup.",
+      "effect": "fast-path",
+      "explain": "Fast path means the packet belongs to an already-allowed session; no policy was evaluated for it.",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "nat-snat",
+      "pattern": "^SNAT (?<from>[0-9a-fA-F:.]+)->(?<to>[0-9a-fA-F:.]+(?::\\d+)?)",
+      "card": "nat",
+      "title": "Source NAT",
+      "text": "Source address {from} is translated to {to}.",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "nat-reversal",
+      "pattern": "^DNAT (?<from>\\S+)->(?<to>\\S+)",
+      "when": "reply",
+      "card": "nat",
+      "title": "NAT reversal (reply of an SNAT session)",
+      "text": "Reply traffic addressed to {from} is translated back to {to}. This undoes the SNAT of the original direction; it is not a virtual IP.",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "nat-vip-new",
+      "pattern": "^DNAT (?<from>\\S+)->(?<to>\\S+)",
+      "when": "new-session",
+      "card": "nat",
+      "title": "Destination NAT / virtual IP",
+      "text": "On a new session the destination {from} is translated to {to}: a virtual IP (VIP) or central DNAT rule matched. The policy lookup then uses the translated destination.",
+      "verified": false,
+      "explain": "Destination NAT (VIP) applied before the policy lookup.",
+      "nextCheck": "Make sure the firewall policy for this traffic uses the VIP object as destination, not the mapped internal address.",
+      "notes": "Wording of VIP lines on new sessions was not in the 7.4.12 samples."
+    },
+    {
+      "id": "nat-dnat",
+      "pattern": "^DNAT (?<from>\\S+)->(?<to>\\S+)",
+      "card": "nat",
+      "title": "Destination NAT",
+      "text": "Destination {from} is translated to {to}.",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "ipsec-enter",
+      "pattern": "^enter IPSec interface (?<tunnel>[^\\s,]+)",
+      "card": "ipsec",
+      "title": "Enter IPsec tunnel {tunnel}",
+      "text": "The packet is routed into IPsec tunnel interface {tunnel}.",
+      "effect": "ipsec",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "ipsec-output",
+      "pattern": "^output to IPSec tunnel (?<tunnel>[^\\s,]+), tun_id=(?<tunid>[^\\s,]+)",
+      "card": "ipsec",
+      "title": "Output to IPsec tunnel {tunnel}",
+      "text": "Sent into tunnel {tunnel}; the remote gateway is {tunid}.",
+      "effect": "ipsec",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "ipsec-encrypt",
+      "pattern": "^IPsec encrypt/auth",
+      "card": "ipsec",
+      "title": "IPsec encrypt / authenticate",
+      "text": "The packet is encrypted and authenticated for the tunnel.",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "ipsec-selector",
+      "pattern": "^src ip (?<src>\\S+) match selector range (?<lo>\\S+)-(?<hi>\\S+)",
+      "card": "ipsec",
+      "title": "Source {src} matches IPsec selector",
+      "text": "Source {src} is inside the phase 2 selector range {lo} - {hi}.",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "send-to",
+      "pattern": "^send to (?<nexthop>\\S+) via intf-(?<dev>\\S+)",
+      "card": "egress",
+      "title": "Sent to {nexthop} via {dev}",
+      "text": "The (encrypted) packet leaves via {dev} towards {nexthop}.",
+      "effect": "forward",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "send-out",
+      "pattern": "^send out via dev-(?<dev>\\S+), dst-mac-(?<mac>\\S+)",
+      "card": "egress",
+      "title": "Sent out via {dev}",
+      "text": "The packet leaves interface {dev} to MAC address {mac}.",
+      "effect": "forward",
+      "versions": ["7.4.12"]
+    },
+    {
+      "id": "drop-rpf",
+      "pattern": "^reverse path check fail",
+      "card": "drop",
+      "title": "Dropped: reverse path check failed",
+      "text": "Reverse path forwarding (RPF / anti-spoofing) failed.",
+      "effect": "drop",
+      "explain": "The FortiGate has no route back to the packet's source address via the interface it arrived on (or the best route points elsewhere), so it treats the packet as spoofed or asymmetric.",
+      "nextCheck": "Run 'get router info routing-table details <source-ip>' and check it points out of the ingress interface. Look for asymmetric routing, a missing static route, or enable 'set asymroute' / adjust 'set src-check' only if intended.",
+      "verified": false,
+      "notes": "Wording from FortiOS knowledge, not seen in the 7.4.12 samples."
+    },
+    {
+      "id": "drop-policy0",
+      "pattern": "^Denied by forward policy check(?: \\(policy (?<policy>\\d+)\\))?",
+      "card": "drop",
+      "title": "Dropped: denied by forward policy check",
+      "text": "No firewall policy accepted this traffic (implicit deny).",
+      "effect": "drop",
+      "explain": "No firewall policy matched this traffic, so the implicit deny (policy 0) dropped it.",
+      "nextCheck": "Check there is a policy with the right incoming/outgoing interface, source and destination address objects (after any DNAT), service and an active schedule. 'diagnose firewall iprope lookup <src> <sport> <dst> <dport> <proto> <iface>' shows which policy would match.",
+      "verified": false,
+      "notes": "Wording from FortiOS knowledge, not seen in the 7.4.12 samples."
+    },
+    {
+      "id": "drop-iprope-in",
+      "pattern": "^iprope_in_check\\(\\) check failed(?: on policy (?<policy>\\d+))?",
+      "card": "drop",
+      "title": "Dropped: iprope_in_check failed",
+      "text": "The local-in policy check failed.",
+      "effect": "drop",
+      "explain": "The packet was addressed to the FortiGate itself and no local-in policy / administrative access setting allowed it.",
+      "nextCheck": "Check 'config system interface' allowaccess on the ingress interface (https, ssh, ping...), trusted hosts on the admin account, and any local-in policies.",
+      "verified": false,
+      "notes": "Wording from FortiOS knowledge, not seen in the 7.4.12 samples."
+    },
+    {
+      "id": "drop-no-policy",
+      "pattern": "^(?:no (?:matching )?polic(?:y|ies) (?:matched|found)|no matching policy)",
+      "card": "drop",
+      "title": "Dropped: no matching policy",
+      "text": "No firewall policy matched.",
+      "effect": "drop",
+      "explain": "No policy matched the traffic's interfaces, addresses and service.",
+      "nextCheck": "Compare the packet's interfaces, addresses and port with your policies; look for a missing policy, wrong service or an inactive schedule.",
+      "verified": false,
+      "notes": "Wording from FortiOS knowledge, not seen in the 7.4.12 samples."
+    }
+  ]
+}
