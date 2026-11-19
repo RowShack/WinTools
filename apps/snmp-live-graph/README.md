@@ -2,7 +2,7 @@
 
 Watch live traffic on a handful of interfaces across a few devices — no server, no database, nothing to install. A free stand-in for the old real-time bandwidth monitors.
 
-[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=snmp-live-graph-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=snmp-live-graph-v&expanded=true) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases?q=snmp-live-graph-v&expanded=true)**
+[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=snmp-live-graph-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases/tag/snmp-live-graph-v0.1.0) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases/tag/snmp-live-graph-v0.1.0)**
 
 ![snmp-live-graph screenshot](docs/screenshot.png)
 *A device added and its interfaces discovered, ready to tick for graphing (demo router on 127.0.0.1).*

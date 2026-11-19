@@ -2,7 +2,7 @@
 
 Prove whether firewall rules work **end to end**: run a listener on one machine and a prober on another. One exe, three tabs.
 
-[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=port-probe-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=port-probe-v&expanded=true) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases?q=port-probe-v&expanded=true)**
+[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=port-probe-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases/tag/port-probe-v0.1.0) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases/tag/port-probe-v0.1.0)**
 
 ![port-probe screenshot](docs/screenshot.png)
 *Probe a host: enter a target and port list (TCP, or `udp:` prefixed).*

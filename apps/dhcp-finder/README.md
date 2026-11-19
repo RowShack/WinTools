@@ -2,7 +2,7 @@
 
 A small Windows app that finds every DHCP server reachable from your network adapters — useful for spotting rogue DHCP servers.
 
-[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=dhcp-finder-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=dhcp-finder-v&expanded=true) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases?q=dhcp-finder-v&expanded=true)**
+[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=dhcp-finder-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases/tag/dhcp-finder-v1.0.0) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases/tag/dhcp-finder-v1.0.0)**
 
 ![dhcp-finder screenshot](docs/screenshot.png)
 *Ready to scan: pick the adapters to probe and set the listen time (demo adapters shown).*

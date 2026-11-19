@@ -2,7 +2,7 @@
 
 A GUI RADIUS client for testing RADIUS servers and NAS integrations: FortiGate, NPS, FreeRADIUS, and MFA proxies such as Okta, Duo or Rublon. It tells you *why* a test failed, not just that it did.
 
-[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=radius-tester-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=radius-tester-v&expanded=true) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases?q=radius-tester-v&expanded=true)**
+[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=radius-tester-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases/tag/radius-tester-v0.1.0) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases/tag/radius-tester-v0.1.0)**
 
 ![radius-tester screenshot](docs/screenshot.png)
 *Ready to use: server profile and the Authenticate tab (demo values, secret and password masked).*

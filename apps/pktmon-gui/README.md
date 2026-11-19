@@ -2,7 +2,7 @@
 
 A front-end for Windows' built-in **Packet Monitor** (`pktmon.exe`) so you can take packet captures on production servers **without installing Wireshark or Npcap**. The app only drives `pktmon.exe`; it installs nothing and loads no driver of its own.
 
-[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=pktmon-gui-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=pktmon-gui-v&expanded=true) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases?q=pktmon-gui-v&expanded=true)**
+[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=pktmon-gui-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases/tag/pktmon-gui-v0.1.0) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases/tag/pktmon-gui-v0.1.0)**
 
 ![pktmon-gui screenshot](docs/screenshot.png)
 *Capture tab: adapter choice, filters and the exact pktmon commands the run will execute (demo values).*
