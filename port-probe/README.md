@@ -8,7 +8,7 @@ Prove whether firewall rules work **end to end**: run a listener on one machine 
 *Probe a host: enter a target and port list (TCP, or `udp:` prefixed).*
 
 ![port-probe screenshot 2](docs/screenshot-2.png)
-*Probing 127.0.0.1 against a real local listener: each port is classified and explained.*
+*Probing 127.0.0.1 against a real local listener: ports with a listener show Open, closed ports show Refused, and each result is explained below the table.*
 
 ## Tabs
 
