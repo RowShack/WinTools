@@ -1,18 +1,18 @@
 # WinTools
 
-Small, single-purpose Windows utilities. Each app lives in its own folder and is released separately (tags are `<app>-vX.Y.Z`).
+Small, single-purpose Windows utilities. Each app lives in its own folder and is released separately (tags are `<app>-vX.Y.Z`). Each is a single portable `.exe`: no installer, nothing left behind.
 
-| App | What it does |
-|-----|--------------|
-| [dhcp-finder](dhcp-finder) | Finds every DHCP server reachable from your adapters — spot rogue DHCP servers |
-| [win-route-edit](win-route-edit) | View, add and delete IPv4 and IPv6 routes, with persistent routes and routing profiles |
-| [mtu-finder](mtu-finder) | Finds the real path MTU to a destination and suggests an MSS clamp |
-| [port-probe](port-probe) | Listener + prober that proves firewall rules work end to end; TCP/UDP states explained, TLS quick check |
-| [auth-mail-test](auth-mail-test) | LDAP/LDAPS and SMTP testers with plain-English error explanations |
-| [pktmon-gui](pktmon-gui) | GUI for the built-in Packet Monitor: filters, pcapng export, drops view (needs admin) |
-| [snmp-live-graph](snmp-live-graph) | Live per-interface bandwidth graphs over SNMP v2c/v3, no server needed |
-| [radius-tester](radius-tester) | RADIUS client for testing servers and NAS setups: PAP/CHAP/MS-CHAPv2, MFA challenge, accounting, RadSec |
-| [host-top](host-top) | Live "who is using the bandwidth" view: throughput per remote host, process and connection via ETW (needs admin) |
-| [forti-flow](forti-flow) | Paste FortiGate `diagnose debug flow` output, get a step-by-step explanation per packet with verdicts, plus a debug command generator |
+| App | What it does | Latest release |
+|-----|--------------|----------------|
+| 🔍 [dhcp-finder](dhcp-finder) | Finds every DHCP server reachable from your adapters — spot rogue DHCP servers | [![dhcp-finder](https://img.shields.io/github/v/release/RowShack/WinTools?filter=dhcp-finder-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=dhcp-finder-v&expanded=true) |
+| 🛣️ [win-route-edit](win-route-edit) | View, add and delete IPv4 and IPv6 routes, with persistent routes and routing profiles | [![win-route-edit](https://img.shields.io/github/v/release/RowShack/WinTools?filter=win-route-edit-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=win-route-edit-v&expanded=true) |
+| 📏 [mtu-finder](mtu-finder) | Finds the real path MTU to a destination and suggests an MSS clamp | [![mtu-finder](https://img.shields.io/github/v/release/RowShack/WinTools?filter=mtu-finder-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=mtu-finder-v&expanded=true) |
+| 🚪 [port-probe](port-probe) | Listener + prober that proves firewall rules work end to end; TCP/UDP states explained, TLS quick check | [![port-probe](https://img.shields.io/github/v/release/RowShack/WinTools?filter=port-probe-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=port-probe-v&expanded=true) |
+| 🔐 [auth-mail-test](auth-mail-test) | LDAP/LDAPS and SMTP testers with plain-English error explanations | [![auth-mail-test](https://img.shields.io/github/v/release/RowShack/WinTools?filter=auth-mail-test-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=auth-mail-test-v&expanded=true) |
+| 📦 [pktmon-gui](pktmon-gui) | GUI for the built-in Packet Monitor: filters, pcapng export, in-app packet viewer, drops view (needs admin) | [![pktmon-gui](https://img.shields.io/github/v/release/RowShack/WinTools?filter=pktmon-gui-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=pktmon-gui-v&expanded=true) |
+| 📈 [snmp-live-graph](snmp-live-graph) | Live per-interface bandwidth graphs over SNMP v2c/v3, no server needed | [![snmp-live-graph](https://img.shields.io/github/v/release/RowShack/WinTools?filter=snmp-live-graph-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=snmp-live-graph-v&expanded=true) |
+| 🔑 [radius-tester](radius-tester) | RADIUS client for testing servers and NAS setups: PAP/CHAP/MS-CHAPv2, MFA challenge, accounting, RadSec | [![radius-tester](https://img.shields.io/github/v/release/RowShack/WinTools?filter=radius-tester-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=radius-tester-v&expanded=true) |
+| 📊 [host-top](host-top) | Live "who is using the bandwidth" view: throughput per remote host, process and connection via ETW (needs admin) | [![host-top](https://img.shields.io/github/v/release/RowShack/WinTools?filter=host-top-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=host-top-v&expanded=true) |
+| 🔥 [forti-flow](forti-flow) | Paste FortiGate `diagnose debug flow` output, get a step-by-step explanation per packet with verdicts, plus a debug command generator | [![forti-flow](https://img.shields.io/github/v/release/RowShack/WinTools?filter=forti-flow-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=forti-flow-v&expanded=true) |
 
-Downloads are on the [Releases](../../releases) page. Building needs the .NET 10 SDK; see each app's README.
+The **Latest release** badge shows the newest version of that app and links to its release page. "No matching releases found" means that app has not been released yet. All downloads are on the [Releases](../../releases) page. Building needs the .NET 10 SDK; see each app's README.
