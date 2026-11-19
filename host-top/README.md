@@ -2,9 +2,13 @@
 
 A live **"who is using the bandwidth right now"** view for Windows, in the spirit of iftop / nethogs / pftop: throughput per **remote host**, per **process** and per **connection**, updated every second. It listens to Windows' own kernel network events (ETW); it installs no driver and no packet capture library.
 
-![Host Top showing demo data](docs/screenshot.png)
+[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=host-top-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=host-top-v&expanded=true) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases?q=host-top-v&expanded=true)**
 
-*(The screenshot uses generated demo data: `HostTop.exe --demo`.)*
+![host-top screenshot](docs/screenshot.png)
+*By host tab with generated demo data (`HostTop.exe --demo`).*
+
+![host-top screenshot, second view](docs/screenshot-2.png)
+*By connection tab: one row per flow, with the owning process, ports and totals (demo data).*
 
 ## Features
 

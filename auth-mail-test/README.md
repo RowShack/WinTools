@@ -2,7 +2,13 @@
 
 Two testers in one window that explain *why* something fails, not just that it did: **LDAP/LDAPS** and **SMTP**.
 
-![screenshot placeholder](docs/screenshot.png)
+[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=auth-mail-test-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=auth-mail-test-v&expanded=true) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases?q=auth-mail-test-v&expanded=true)**
+
+![auth-mail-test screenshot](docs/screenshot.png)
+*LDAP tab, ready to test: server, security, bind and search settings (demo values, password masked).*
+
+![auth-mail-test screenshot, second view](docs/screenshot-2.png)
+*SMTP tab after a STARTTLS test against a local demo server: step list, certificate details and the SMTP conversation.*
 
 ## LDAP tab
 

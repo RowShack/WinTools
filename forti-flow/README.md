@@ -2,7 +2,13 @@
 
 Paste the output of FortiGate `diagnose debug flow` and get a readable, step-by-step explanation of what happened to each packet: received → session → route → policy → NAT → IPsec → offload → egress, with a verdict (forwarded / dropped / local-in), the deciding line highlighted, a plain-English explanation and a suggested next check.
 
-![FortiFlow screenshot](docs/screenshot.png) <!-- screenshot placeholder: packet list on the left, step cards on the right -->
+[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=forti-flow-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=forti-flow-v&expanded=true) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases?q=forti-flow-v&expanded=true)**
+
+![forti-flow screenshot](docs/screenshot.png)
+*Explain tab: packet list on the left, step cards on the right (demo sample).*
+
+![forti-flow screenshot, second view](docs/screenshot-2.png)
+*Command generator tab: the FortiGate command sequence to start and stop the trace (documentation addresses).*
 
 ## Requirements
 
