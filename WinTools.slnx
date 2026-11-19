@@ -1,89 +1,53 @@
-<Solution>
-  <Folder Name="/auth-mail-test.Core/">
-    <Project Path="auth-mail-test.Core/AuthMailTest.Core.csproj" />
-  </Folder>
-  <Folder Name="/auth-mail-test.Tests/">
-    <Project Path="auth-mail-test.Tests/AuthMailTest.Tests.csproj" />
-  </Folder>
-  <Folder Name="/auth-mail-test/">
-    <Project Path="auth-mail-test/AuthMailTest.csproj" />
-  </Folder>
-  <Folder Name="/dhcp-finder/">
-    <Project Path="dhcp-finder/DhcpFinder.csproj" />
-  </Folder>
-  <Folder Name="/host-top.Core/">
-    <Project Path="host-top.Core/HostTop.Core.csproj" />
-  </Folder>
-  <Folder Name="/host-top.Tests/">
-    <Project Path="host-top.Tests/HostTop.Tests.csproj" />
-  </Folder>
-  <Folder Name="/host-top/">
-    <Project Path="host-top/HostTop.csproj" />
-  </Folder>
-  <Folder Name="/forti-flow.Core/">
-    <Project Path="forti-flow.Core/FortiFlow.Core.csproj" />
-  </Folder>
-  <Folder Name="/forti-flow.Tests/">
-    <Project Path="forti-flow.Tests/FortiFlow.Tests.csproj" />
-  </Folder>
-  <Folder Name="/forti-flow/">
-    <Project Path="forti-flow/FortiFlow.csproj" />
-  </Folder>
-  <Folder Name="/mtu-finder.Core/">
-    <Project Path="mtu-finder.Core/MtuFinder.Core.csproj" />
-  </Folder>
-  <Folder Name="/mtu-finder.Tests/">
-    <Project Path="mtu-finder.Tests/MtuFinder.Tests.csproj" />
-  </Folder>
-  <Folder Name="/mtu-finder/">
-    <Project Path="mtu-finder/MtuFinder.csproj" />
-  </Folder>
-  <Folder Name="/pktmon-gui.Core/">
-    <Project Path="pktmon-gui.Core/PktmonGui.Core.csproj" />
-  </Folder>
-  <Folder Name="/pktmon-gui.Tests/">
-    <Project Path="pktmon-gui.Tests/PktmonGui.Tests.csproj" />
-  </Folder>
-  <Folder Name="/pktmon-gui/">
-    <Project Path="pktmon-gui/PktmonGui.csproj" />
-  </Folder>
-  <Folder Name="/port-probe.Core/">
-    <Project Path="port-probe.Core/PortProbe.Core.csproj" />
-  </Folder>
-  <Folder Name="/port-probe.Tests/">
-    <Project Path="port-probe.Tests/PortProbe.Tests.csproj" />
-  </Folder>
-  <Folder Name="/port-probe/">
-    <Project Path="port-probe/PortProbe.csproj" />
-  </Folder>
-  <Folder Name="/radius-tester.Core/">
-    <Project Path="radius-tester.Core/RadiusTester.Core.csproj" />
-  </Folder>
-  <Folder Name="/radius-tester.Tests/">
-    <Project Path="radius-tester.Tests/RadiusTester.Tests.csproj" />
-  </Folder>
-  <Folder Name="/radius-tester/">
-    <Project Path="radius-tester/RadiusTester.csproj" />
-  </Folder>
-  <Folder Name="/snmp-live-graph.Core/">
-    <Project Path="snmp-live-graph.Core/SnmpLiveGraph.Core.csproj" />
-  </Folder>
-  <Folder Name="/snmp-live-graph.Tests/">
-    <Project Path="snmp-live-graph.Tests/SnmpLiveGraph.Tests.csproj" />
-  </Folder>
-  <Folder Name="/snmp-live-graph/">
-    <Project Path="snmp-live-graph/SnmpLiveGraph.csproj" />
-  </Folder>
-  <Folder Name="/wifi-roam-log.Core/">
-    <Project Path="wifi-roam-log.Core/WifiRoamLog.Core.csproj" />
-  </Folder>
-  <Folder Name="/wifi-roam-log.Tests/">
-    <Project Path="wifi-roam-log.Tests/WifiRoamLog.Tests.csproj" />
-  </Folder>
-  <Folder Name="/wifi-roam-log/">
-    <Project Path="wifi-roam-log/WifiRoamLog.csproj" />
-  </Folder>
-  <Folder Name="/win-route-edit/">
-    <Project Path="win-route-edit/WinRouteEdit.csproj" />
-  </Folder>
-</Solution>
+<Solution>
+  <Folder Name="/apps/auth-mail-test/">
+    <Project Path="apps/auth-mail-test/gui/AuthMailTest.csproj" />
+    <Project Path="apps/auth-mail-test/core/AuthMailTest.Core.csproj" />
+    <Project Path="apps/auth-mail-test/tests/AuthMailTest.Tests.csproj" />
+  </Folder>
+  <Folder Name="/apps/dhcp-finder/">
+    <Project Path="apps/dhcp-finder/DhcpFinder.csproj" />
+  </Folder>
+  <Folder Name="/apps/forti-flow/">
+    <Project Path="apps/forti-flow/gui/FortiFlow.csproj" />
+    <Project Path="apps/forti-flow/core/FortiFlow.Core.csproj" />
+    <Project Path="apps/forti-flow/tests/FortiFlow.Tests.csproj" />
+  </Folder>
+  <Folder Name="/apps/host-top/">
+    <Project Path="apps/host-top/gui/HostTop.csproj" />
+    <Project Path="apps/host-top/core/HostTop.Core.csproj" />
+    <Project Path="apps/host-top/tests/HostTop.Tests.csproj" />
+  </Folder>
+  <Folder Name="/apps/mtu-finder/">
+    <Project Path="apps/mtu-finder/gui/MtuFinder.csproj" />
+    <Project Path="apps/mtu-finder/core/MtuFinder.Core.csproj" />
+    <Project Path="apps/mtu-finder/tests/MtuFinder.Tests.csproj" />
+  </Folder>
+  <Folder Name="/apps/pktmon-gui/">
+    <Project Path="apps/pktmon-gui/gui/PktmonGui.csproj" />
+    <Project Path="apps/pktmon-gui/core/PktmonGui.Core.csproj" />
+    <Project Path="apps/pktmon-gui/tests/PktmonGui.Tests.csproj" />
+  </Folder>
+  <Folder Name="/apps/port-probe/">
+    <Project Path="apps/port-probe/gui/PortProbe.csproj" />
+    <Project Path="apps/port-probe/core/PortProbe.Core.csproj" />
+    <Project Path="apps/port-probe/tests/PortProbe.Tests.csproj" />
+  </Folder>
+  <Folder Name="/apps/radius-tester/">
+    <Project Path="apps/radius-tester/gui/RadiusTester.csproj" />
+    <Project Path="apps/radius-tester/core/RadiusTester.Core.csproj" />
+    <Project Path="apps/radius-tester/tests/RadiusTester.Tests.csproj" />
+  </Folder>
+  <Folder Name="/apps/snmp-live-graph/">
+    <Project Path="apps/snmp-live-graph/gui/SnmpLiveGraph.csproj" />
+    <Project Path="apps/snmp-live-graph/core/SnmpLiveGraph.Core.csproj" />
+    <Project Path="apps/snmp-live-graph/tests/SnmpLiveGraph.Tests.csproj" />
+  </Folder>
+  <Folder Name="/apps/wifi-roam-log/">
+    <Project Path="apps/wifi-roam-log/gui/WifiRoamLog.csproj" />
+    <Project Path="apps/wifi-roam-log/core/WifiRoamLog.Core.csproj" />
+    <Project Path="apps/wifi-roam-log/tests/WifiRoamLog.Tests.csproj" />
+  </Folder>
+  <Folder Name="/apps/win-route-edit/">
+    <Project Path="apps/win-route-edit/WinRouteEdit.csproj" />
+  </Folder>
+</Solution>

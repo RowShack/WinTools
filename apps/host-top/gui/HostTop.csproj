@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>HostTop</AssemblyName>
+    <RootNamespace>HostTop</RootNamespace>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <Version>0.1.0</Version>
+    <!-- ETW kernel network events need administrator rights, so the exe asks for them. Set -p:UseAdminManifest=false only for UI testing (and run with the demo switch). -->
+    <ApplicationManifest Condition="'$(UseAdminManifest)' != 'false'">app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\core\HostTop.Core.csproj" />
+  </ItemGroup>
+
+</Project>
