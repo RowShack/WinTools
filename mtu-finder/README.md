@@ -2,7 +2,13 @@
 
 Finds the real path MTU to a destination and suggests a TCP MSS clamp — useful for VPN/IPsec, PPPoE and GRE problems.
 
-![screenshot placeholder](docs/screenshot.png)
+[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=mtu-finder-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=mtu-finder-v&expanded=true) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases?q=mtu-finder-v&expanded=true)**
+
+![mtu-finder screenshot](docs/screenshot.png)
+*Ready to use: enter a target and click Find MTU; the reference list of common MTUs is on the right.*
+
+![mtu-finder screenshot 2](docs/screenshot-2.png)
+*Result for a loopback target: path MTU, suggested MSS and the probe log.*
 
 ## How it works
 

@@ -2,6 +2,14 @@
 
 A small Windows GUI for viewing and editing the IPv4 and IPv6 routing tables — handy when troubleshooting, or when you change routes a lot.
 
+[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=win-route-edit-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=win-route-edit-v&expanded=true) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases?q=win-route-edit-v&expanded=true)**
+
+![win-route-edit screenshot](docs/screenshot.png)
+*The IPv4 routing table: default routes in bold, persistent routes shaded, saved-but-inactive routes greyed out (demo data).*
+
+![win-route-edit screenshot 2](docs/screenshot-2.png)
+*Managing route profiles: named sets of routes you can apply or remove in one click (demo data).*
+
 ## Features
 
 - Separate IPv4 and IPv6 tabs showing the live routing table (destination, gateway, interface, route/interface/total metric, origin), sortable and filterable
