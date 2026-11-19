@@ -2,7 +2,15 @@
 
 Records what your Wi-Fi was doing over time (signal, access point, channel, roams, disconnects, latency and packet loss) so that "the Wi-Fi was slow at 10:15" can be matched to an AP roam, weak signal or loss. Leave it running in the system tray all day, then open the log and look at 10:15.
 
+[![Latest release](https://img.shields.io/github/v/release/RowShack/WinTools?filter=wifi-roam-log-v*&display_name=tag&label=latest)](https://github.com/RowShack/WinTools/releases?q=wifi-roam-log-v&expanded=true) &nbsp; **[Download from the release page](https://github.com/RowShack/WinTools/releases?q=wifi-roam-log-v&expanded=true)**
+
+**Live view:** signal and latency on one time axis, with roams and disconnects as vertical markers.
+
 ![Wi-Fi Roam Log live view (generated demo data)](docs/live.png)
+
+**Visible APs:** neighbouring access points with RSSI and channel, plus a channel-overlap view.
+
+![Wi-Fi Roam Log visible APs tab (generated demo data)](docs/visible-aps.png)
 
 *(Screenshots use generated demo data: `WifiRoamLog.exe --demo`.)*
 
