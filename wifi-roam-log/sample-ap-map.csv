@@ -1,0 +1,7 @@
+BSSID prefix,AP name,Location
+# One row per access point. A prefix of 5 octets (the default) matches every SSID/radio of that AP,
+# because controllers vary only the last octet for the extra SSIDs. Any prefix length from 1 to 6 octets is accepted.
+94:2a:6f:5d:a1,FAP-2F-East,Floor 2 east wing
+94:2a:6f:d1:07,FAP-3F-West,Floor 3 west wing
+94:2a:6f:a8:11,FAP-1F-Lobby,Reception
+e4:5f:01:22:33,Lab-AP-01,Lab (test)

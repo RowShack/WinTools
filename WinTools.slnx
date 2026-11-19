@@ -74,6 +74,15 @@
   <Folder Name="/snmp-live-graph/">
     <Project Path="snmp-live-graph/SnmpLiveGraph.csproj" />
   </Folder>
+  <Folder Name="/wifi-roam-log.Core/">
+    <Project Path="wifi-roam-log.Core/WifiRoamLog.Core.csproj" />
+  </Folder>
+  <Folder Name="/wifi-roam-log.Tests/">
+    <Project Path="wifi-roam-log.Tests/WifiRoamLog.Tests.csproj" />
+  </Folder>
+  <Folder Name="/wifi-roam-log/">
+    <Project Path="wifi-roam-log/WifiRoamLog.csproj" />
+  </Folder>
   <Folder Name="/win-route-edit/">
     <Project Path="win-route-edit/WinRouteEdit.csproj" />
   </Folder>
