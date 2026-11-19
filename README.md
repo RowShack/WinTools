@@ -9,7 +9,7 @@ Every release has two `.exe` files. They contain the same app and behave identic
 | File | Size | Needs | Pick it when |
 |------|------|-------|--------------|
 | `<App>-selfcontained.exe` | about 115-140 MB | nothing | **You just want it to work (recommended).** Runs on any 64-bit Windows 10/11, including servers and offline machines. It carries the .NET runtime inside, which is why it is large; the first start can take a second or two longer while it unpacks. |
-| `<App>-framework-dependent.exe` | 0.3-8 MB | the [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) (x64) | You already have .NET 10, or you hand the tools to many people and want a tiny download. If the runtime is missing, Windows tells you and links to it; or install it with `winget install Microsoft.DotNet.DesktopRuntime.10`. |
+| `<App>-framework-dependent.exe` | 0.3-22 MB | the [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) (x64) | You already have .NET 10, or you hand the tools to many people and want a tiny download. If the runtime is missing, Windows tells you and links to it; or install it with `winget install Microsoft.DotNet.DesktopRuntime.10`. |
 
 Nothing needs installing either way, and nothing is left behind. The exes are not code-signed, so Windows SmartScreen may warn on first run (More info, then Run anyway). Tools that read network state or capture packets (pktmon-gui, host-top) ask for administrator rights.
 
