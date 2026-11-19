@@ -6,7 +6,7 @@ namespace WifiRoamLog;
 
 public sealed class StartOptions
 {
-    public bool Demo, Minimized, AutoStart;
+    public bool Demo, Minimized, AutoStart, Stress;
     public string? Screenshot;
     public string ScreenshotTab = "live";
     public double ShotDelaySeconds = 2.5;
@@ -150,9 +150,9 @@ public sealed class MainForm : Form
         evBar.Controls.AddRange([_copyEvents, _exportEvents, _eventsHint]);
         var evPanel = new Panel { Dock = DockStyle.Fill };
         evPanel.Controls.Add(_events); evPanel.Controls.Add(evBar);
-        var split = new SplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Horizontal };
+        var split = new SafeSplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Horizontal };
         split.Panel1.Controls.Add(_chart); split.Panel2.Controls.Add(evPanel);
-        HandleCreated += (_, _) => { try { split.Panel1MinSize = 160; split.Panel2MinSize = 110; split.SplitterDistance = Math.Max(160, (int)(split.Height * 0.55)); } catch { } };
+        split.SetRatio(0.55, 160, 110);
         var live = new TabPage("Live") { Padding = Padding.Empty }; live.Controls.Add(split);
         var vis = new TabPage("Visible APs") { Padding = Padding.Empty }; vis.Controls.Add(_visible);
         _tabs.TabPages.AddRange([live, vis]);
@@ -254,6 +254,7 @@ public sealed class MainForm : Form
         if (_opt.Minimized) { WindowState = FormWindowState.Minimized; Hide(); }
         if (_opt.AutoStart) ToggleSession();
         if (_opt.Screenshot != null) _ = TakeScreenshotAsync();
+        if (_opt.Stress) _ = StressAsync();
     }
 
     // ---------------------------------------------------------------- session
@@ -278,7 +279,7 @@ public sealed class MainForm : Form
             }
             catch (Exception ex) { MessageBox.Show(this, "Cannot create the log folder:\r\n" + ex.Message, "Wi-Fi Roam Log", MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
         }
-        _live = data; _writer = writer; _lastFolder = writer?.Folder ?? _lastFolder;
+        _live = data; _writer = writer; _lastFolder = writer?.Folder ?? _lastFolder; CrashLog.SessionFolder = writer?.Folder;
         lock (_gwWin) { _gwWin.Clear(); } lock (_tgWin) { _tgWin.Clear(); }
         _shownEvents = -1;
         if (_view is null) _chart.SetData(_live, true);
@@ -656,6 +657,40 @@ public sealed class MainForm : Form
         _settings.WindowMinutes = WindowMinutesFromCombo();
         if (SelectedIface is { } id) _settings.AdapterGuid = id.ToString();
         _settings.Save();
+    }
+
+    // ---------------------------------------------------------------- stress harness (--stress): scripted tray / resize / tab / hide sequences, must not throw
+
+    private async Task StressAsync()
+    {
+        int errors = 0;
+        void Step(string name, Action a) { try { a(); } catch (Exception ex) { errors++; CrashLog.Write(new Exception("STRESS step '" + name + "': " + ex)); } }
+        try
+        {
+            await Task.Delay(1500);
+            Step("start", () => ToggleSession()); await Task.Delay(1500);
+            for (int i = 0; i < 3; i++)
+            {
+                Step("minimize", () => WindowState = FormWindowState.Minimized); await Task.Delay(1200);   // hides to tray while logging
+                Step("restore", RestoreFromTray); await Task.Delay(900);
+                Step("tab visible", () => _tabs.SelectedIndex = 1); await Task.Delay(800);
+                Step("tab live", () => _tabs.SelectedIndex = 0); await Task.Delay(500);
+                Step("tiny", () => Size = new Size(200, 150)); await Task.Delay(600);
+                Step("small", () => Size = new Size(960, 620)); await Task.Delay(600);
+                Step("tiny while visible tab", () => { _tabs.SelectedIndex = 1; Size = new Size(10, 10); }); await Task.Delay(600);
+                Step("normal", () => { Size = new Size(1100, 700); _tabs.SelectedIndex = 0; }); await Task.Delay(600);
+                Step("hide", Hide); await Task.Delay(1500);
+                Step("show", () => { Show(); WindowState = FormWindowState.Normal; }); await Task.Delay(600);
+                Step("maximize", () => WindowState = FormWindowState.Maximized); await Task.Delay(600);
+                Step("normal", () => WindowState = FormWindowState.Normal); await Task.Delay(600);
+            }
+            Step("stop", () => ToggleSession()); await Task.Delay(1500);
+        }
+        finally
+        {
+            File.WriteAllText(Path.Combine(Path.GetTempPath(), "wrl-stress-result.txt"), $"errors={errors}");
+            _exiting = true; Application.Exit();
+        }
     }
 
     // ---------------------------------------------------------------- screenshots

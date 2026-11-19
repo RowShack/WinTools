@@ -39,7 +39,7 @@ public sealed class VisibleApsView : UserControl
         Col("SSID", "Ssid", 150); Col("AP name", "Ap", 150); Col("BSSID", "Bssid", 135); Col("RSSI (dBm)", "Rssi", 80, true); Col("Channel", "Channel", 62, true);
         Col("Band", "BandText", 65); Col("MHz", "Freq", 52, true); Col("PHY", "Phy", 140); Col("Security", "Security", 120); Col("", "Mark", 95);
 
-        var split = new SplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Horizontal };
+        var split = new SafeSplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Horizontal };
         split.Panel1.Controls.Add(_grid);
         split.Panel2.Controls.Add(_plot);
         Controls.Add(split);
@@ -47,7 +47,7 @@ public sealed class VisibleApsView : UserControl
         _plot.Plot.Layout.Fixed(new ScottPlot.PixelPadding(56, 14, 44, 10));
         _refresh.Click += async (_, _) => await RefreshAsync(scan: true);
         _band.SelectedIndexChanged += (_, _) => DrawOverlap();
-        HandleCreated += (_, _) => { try { split.SplitterDistance = Math.Max(60, (int)(split.Height * 0.52)); } catch { } };
+        split.SetRatio(0.52, 60, 60);
     }
 
     /// <summary>Re-reads the cached BSS list (no scan). Called when the tab is shown.</summary>
